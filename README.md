@@ -79,15 +79,17 @@ TCGAbiolinks is one established and approved R / Bioconductor software within th
 # Previous links from Antonio Colaprico, PhD with slides and R tutorial - codes
 
 ## Mining and analysis of genomic and epigenomic data (TCGA) using R by Catharina Olsen, PhD [6 hours] and Antonio Colaprico, PhD [6 hours] Biopark Charleroi , Gosselies, Belgiu, December, 2016
+*[Flyer : http://www.biopark.be/bioparkformation/docs/DATA31.pdf]
 *(http://di.ulb.ac.be/map/colsen/biopark_2016.html)
 
 ## Analyses of TCGA Genomic and Epigenomic Data Workshop by Antonio Colaprico, PhD [12 hours] 10-11th of July 2018; Poznan, Poland
+*[Flyer : https://iimo.pl/img/workshop-1/AI-workshop_10-11Jul2018.pdf]
 *(https://iimo.pl/workshop-1_program.php)
 *(https://iimo.pl/events.php)
 *(http://pums.ump.edu.pl/workshop-on-analyses-of-tcga-genomic-and-epigenomic-data/)
 
 ## CARD	WORKSHOP: The	Cancer	Genome	Atlas 22-23 Nov 2016, Danish Cancer Society Research, DCRC, Copenaghen, Denmark by Elena Papaleo, PhD [6 hours] and Antonio Colaprico, PhD [6 hours] 
-*()
+*Flyer : (./pdf/DCRC_CARD_workshop_TCGAbiolinks)
 
 ## MLG 18/07/2016 - TCGAbiolinks: data, analyses & applications by Antonio Colaprico, Bruxelles, Belgium
 *(https://www.youtube.com/watch?v=eP9C3kKA8eo)
