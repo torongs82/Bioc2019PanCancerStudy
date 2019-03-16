@@ -2,7 +2,9 @@
 #### 15 March 2019
 
 </br>
-#### Antonio Colaprico, PhD [Assistant Scientist] (<axc1833@med.miami.edu>)
+#### Antonio Colaprico, PhD [Assistant Scientist, University of Miami] (< axc1833@med.miami.edu >)
+(https://scholar.google.it/citations?user=76mY_3cAAAAJ&hl=en)
+
 
 # Workshop Description
 Recently, The Cancer Genome Atlas (TCGA’s) Pan-Cancer Atlas initiative presented a comprehensive collection of 27 studies covering 11,000 patient tumors from 33 cancer types. These studies investigated cancer complexity from different angles and integrating multi -omics and clinical data . The computational tools developed from these studies have led to the identification of  299 cancer-driver genes and over 3,400 driver mutations. While these methods have uncovered the cancers complexity, it still remains critical to clarify the consequences of each alteration and with the underlying biological effects.
