@@ -66,7 +66,11 @@ TCGAbiolinks is one established and approved R / Bioconductor software within th
 # Workshop goals and objectives
 
 ## Learning goals
-
+People with no knowledge of data mining will learn to:
+*  Recognize benefits and understanding the complexities of data mining;
+* Understand how to extract added value from their most valuable medical and genomics data;
+*  Decide which data-mining technique is the most appropriate in given situations;
+* Study real applications of data mining in life sciences (bioinformatics, genomics);
 * Understanding molecular changes on multi -omics data type (Gene Expression, Methylation, etc)
 
 ## Learning objectives
