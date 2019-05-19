@@ -65,7 +65,6 @@ library(dplyr)
 ```
 
 # Data retrieval from (GDC, TCGA, GEO and IHEC)
-# GDC and TCGA using `TCGAbiolinks`
 
 You can easily query - download - prepare multi -omics data from GDC:
 . Gene expression
@@ -472,9 +471,9 @@ NazorMatrix <- NazorMatrix[,dataNazor_samples$geo_accession]
 
 
 ```
+# Stemness Analysis
 
-
-# Validation of Stemness signature in external dataset. Nazor et al.,  Cell Stem Cell 2012 
+## Validation of Stemness signature in external dataset. Nazor et al.,  Cell Stem Cell 2012 
 ```{r, eval = FALSE}
 # Firstly we have previously prepared the Gene Expression matrix (genes in rows , samples in columns) 
 # for Nazor's dataset using Moonlight and getGEO's function.
@@ -536,7 +535,7 @@ grid.raster(img)
 ```
 
 
-# Validation of Stemness signature in external dataset. IHEC  Author et al.,  Cell 2016 
+## Validation of Stemness signature in external dataset. IHEC  Author et al.,  Cell 2016 
 ```{r, eval = FALSE}
 
 # stemness score with IHEC samples
@@ -625,7 +624,7 @@ grid.raster(img)
 ```
 
 
-# Generating Stemness score for TCGA gene expression data (mRNASi). Malta et al. Cell, 2018 
+## Generating Stemness score for TCGA gene expression data (mRNASi). Malta et al. Cell, 2018 
 
 ```{r, eval = FALSE}
 # Firstly we load Gene Expression matrix (genes in rows , samples in columns) 
@@ -722,7 +721,7 @@ grid.raster(img)
 ```
 
 
-# Generating Stemness score for TCGA LGG and GBM gene expression data (mRNASi). Malta et al. Cell, 2018 
+## Generating Stemness score for TCGA LGG and GBM gene expression data (mRNASi). Malta et al. Cell, 2018 
 
 ```{r, eval = FALSE}
 
@@ -783,7 +782,7 @@ grid.raster(img)
 ```
 
 
-# Stemness index is associated with overall survival (Glioma example)
+## Stemness index is associated with overall survival (Glioma example)
 
 ```{r, eval = FALSE}
 
@@ -853,7 +852,9 @@ grid.raster(img)
 ```
 
 
-# KM survival analysis of TCGA KIRC samples with Immune Subtypes from Thorsson et al., Immunity, 2018
+# Immune subtypes
+
+## KM survival analysis of TCGA KIRC samples with Immune Subtypes from Thorsson et al., Immunity, 2018
 ```{r, eval = FALSE}
 download.file(url = "https://ars.els-cdn.com/content/image/1-s2.0-S1074761318301213-mmc2.xlsx",
                destfile = "X1_s2_0_S1074761318301213_mmc2")
@@ -900,7 +901,7 @@ img <- readPNG("TCGA_KIRC_ImmuneSubtypes_survival.png")
 grid.raster(img)
 ```
 
-# Immune Subtypes for GEO samples (KIRC example) using data from Jones et al.,Clin Cancer Res 2005  (16115910)
+## Immune Subtypes for GEO samples (KIRC example) using data from Jones et al.,Clin Cancer Res 2005  (16115910)
 
 ```{r, eval = FALSE}
 
@@ -951,7 +952,7 @@ dataImmuneSubtype <- TCGAanalyze_ImmuneSubtypes(ImmuneMW = ImmuneMW,
 ```
 
 
-## Oncogenic processes and driver genes using MoonlightR
+# Oncogenic processes and driver genes using MoonlightR
 
 To include some examples from
 http://bioconductor.org/packages/release/bioc/vignettes/MoonlightR/inst/doc/Moonlight.html
