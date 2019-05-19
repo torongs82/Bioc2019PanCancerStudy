@@ -1,0 +1,939 @@
+---
+title: "Bioinformatics tools to integrate and understand molecular changes associated with Immune Response, Stemness and Oncogenic processes: A PanCancer study."
+bibliography: bibliography.bib    
+vignette: >
+    %\VignetteIndexEntry{7. Analyzing and visualizing TCGA data}
+    %\VignetteEngine{knitr::rmarkdown}
+---
+  
+# Workshop: overview 
+
+ In this workshop we will show the capability of TCGAbiolinks and Moonlight, to integrate multi -omics data from different consortium and to reproduce the six immune subtypes from TCGA PanCancer and how features (Immune Subtypes, Oncogenic Processes, Driver Genes and Stemness) can be used by the end user to expand their understating of their own un-published data. 
+
+The workshop is organized in 4 subsections:
+ 
+1. Data retrieval from (TCGA, GTEx, GEO and IHEC)
+2. Immune Subtypes
+3. Oncognic Processes and Driver Genes
+4. Stemness scores
+ 
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi = 300)
+knitr::opts_chunk$set(cache=FALSE)
+```
+  
+```{r, eval= FALSE, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
+devtools::load_all(".")
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(SummarizedExperiment)
+library(dplyr)
+#library(DT)
+```
+
+# Data retrieval from (GDC, TCGA, GEO and IHEC)
+# GDC and TCGA using `TCGAbiolinks`
+
+You can easily query - download - prepare multi -omics data from GDC:
+. Gene expression
+. Copy number
+. Protein expression (RRPA)
+. Methylation 
+. Clinical data
+. microRNA 
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(SummarizedExperiment)
+library(dplyr)
+#library(DT)
+```
+
+## GDC TCGA Gene Expression data (IlluminaHiSeq_RNASeqV2) using TCGAbiolinks
+
+You can easily search TCGA samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+
+#DataDir <- "~/Dropbox (Personal)/Umiami/TCGAanalysis/GDCdata/TCGA-BRCA"
+
+# Firstly we install TCGAbiolinks from bioconductor or from github
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("TCGAbiolinks")
+
+require(TCGAbiolinks)
+
+
+cancerType <- "BRCA"
+
+# Query platform Illumina HiSeq with a list of barcode 
+query <- GDCquery(project = paste0("TCGA-",cancerType),
+                  data.category = "Gene expression",
+                  data.type = "Gene expression quantification",
+                  experimental.strategy = "RNA-Seq",
+                  platform = "Illumina HiSeq",
+                  file.type = "results",
+                  legacy = TRUE)
+
+# We select 10 tumor and 10 normal samples
+Sample_sel <- query$results[[1]]$cases
+
+Sample_sel_TP <- TCGAquery_SampleTypes(barcode = Sample_sel,typesample = "TP")
+Sample_sel_NT <- TCGAquery_SampleTypes(barcode = Sample_sel,typesample = "NT")                               
+
+Sample_sel_short <- c(Sample_sel_TP[1:10],Sample_sel_NT[1:10])
+
+# we need to create a new query with the selected barcodes
+query_down <- GDCquery(project = paste0("TCGA-",cancerType),
+                  data.category = "Gene expression",
+                  data.type = "Gene expression quantification",
+                  experimental.strategy = "RNA-Seq",
+                  platform = "Illumina HiSeq",
+                  file.type = "results",
+                  barcode = Sample_sel_short,
+                  legacy = TRUE)
+
+
+# Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
+GDCdownload(query_down,directory = DataDir)
+
+# Prepare expression matrix with geneID in the rows and samples (barcode) in the columns
+# rsem.genes.results as values
+BRCARnaseqSE <- GDCprepare(query_down,directory = DataDir)
+# 
+# For gene expression if you need to see a boxplot correlation and AAIC plot to define outliers you can run
+dataPrep <- TCGAanalyze_Preprocessing(BRCARnaseqSE)
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE,size = 8}
+library(TCGAbiolinks)
+dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
+
+knitr::kable(dataGE[1:10,2:3], digits = 2, 
+             caption = "Example of a matrix of gene expression (10 genes in rows and 2 samples in columns)",
+             row.names = TRUE)
+```
+
+The result from TCGAanalyze_Preprocessing is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("PreprocessingOutput.png")
+grid.raster(img)
+```
+
+## GDC TCGA Protein Expression data (RPPA) using TCGAbiolinks
+
+You can easily search TCGA samples, download and prepare a matrix of protein RPPA expression.
+```{r, eval = FALSE}
+
+cancerType <- "BRCA"
+
+query.RPPA <- GDCquery(project = paste0("TCGA-",cancerType), 
+                       legacy = TRUE,
+                       data.category = "Protein expression",
+                       platform = "MDA_RPPA_Core", 
+                       data.type = "Protein expression quantification",
+                       file.type = "expression", 
+                       sample.type = c("Primary solid Tumor"))
+
+samples.RPPA <- query.RPPA$results[[1]]$cases
+
+
+query.RPPA.down <- GDCquery(project = paste0("TCGA-",cancerType), 
+                            legacy = TRUE,
+                            data.category = "Protein expression",
+                            data.type = "Protein expression quantification",
+                            platform = "MDA_RPPA_Core", 
+                            file.type = "expression", 
+                            sample.type = c("Primary solid Tumor"),
+                            barcode = samples.RPPA)
+
+
+GDCdownload(query.RPPA.down, 
+            directory = PathDir)
+
+data.RPPA <- GDCprepare(query.RPPA.down, 
+                        directory = PathDir)
+
+```
+
+## GDC TCGA Copy number variation (CNV) Affymetrix SNP Array 6.0 using TCGAbiolinks
+
+You can easily search TCGA samples, download and prepare a matrix of CN segments.
+```{r, eval = FALSE}
+require(TCGAbiolinks)
+
+cancerType <- "BRCA"
+query.cnv <- GDCquery(project = cancerType,
+                      data.category =  "Copy number variation",
+                      legacy = TRUE,
+                      data.type = "Copy number segmentation",
+                      platform = "Affymetrix SNP Array 6.0",
+                      file.type = "nocnv_hg19.seg",
+                      sample.type = c("Primary solid Tumor"))
+
+samples.cnv <- query.cnv$results[[1]]$cases[1:20]
+
+query.cnv.down <- GDCquery(project = cancerType,
+                      data.category =  "Copy number variation",
+                      legacy = TRUE,
+                      platform = "Affymetrix SNP Array 6.0",
+                      data.type = "Copy number segmentation",
+                      file.type = "nocnv_hg19.seg",
+                      sample.type = c("Primary solid Tumor"),
+                      barcode = samples.cnv)
+
+GDCdownload(query.cnv.down,
+            directory = PathDir)
+
+data.cnv <- GDCprepare(query.cnv.down, 
+                        directory = PathDir)
+
+data.cnv <- as.data.frame(data.cnv)
+```
+
+## GDC TCGA DNA methylation Illumina Human Methylation 450 using TCGAbiolinks
+
+You can easily search TCGA samples, download and prepare a matrix of DNA methylation probes.
+```{r, eval = FALSE}
+require(TCGAbiolinks)
+cancerType <- "BRCA"
+query.met <- GDCquery(project = cancerType, 
+                      legacy = TRUE,
+                      data.category = "DNA methylation",
+                      platform = "Illumina Human Methylation 450",
+                      sample.type = c("Primary solid Tumor"))
+
+samples.met <- query.met$results[[1]]$cases[1:20]
+
+query.met.down <- GDCquery(project = cancerType, 
+                      legacy = TRUE,
+                      data.category = "DNA methylation",
+                      platform = "Illumina Human Methylation 450",
+                      sample.type = c("Primary solid Tumor"),
+                      barcode = samples.met)
+
+GDCdownload(query.met.down,
+            directory = PathDir)
+
+data.met <- GDCprepare(query.met.down, 
+                       directory = PathDir)
+
+```
+
+## GDC TCGA Mutation MAF using TCGAbiolinks
+
+You can easily search TCGA samples, download and prepare a matrix of Mutations.
+```{r, eval = FALSE}
+cancerType <- "TCGA-BRCA"
+query.mut <- GDCquery(project = cancerType, 
+                      data.category = "Simple nucleotide variation", 
+                      data.type = "Simple somatic mutation",
+                      access = "open", 
+                      sample.type = c("Primary solid Tumor"),
+                      legacy = TRUE)
+
+# Check maf availables
+query.mut$results[[1]]$file_name
+
+query.mut <- GDCquery(project = cancerType, 
+                      data.category = "Simple nucleotide variation", 
+                      data.type = "Simple somatic mutation",
+                      access = "open", 
+                      sample.type = c("Primary solid Tumor"),
+                      legacy = TRUE,
+                      file.type = query.mut$results[[1]]$file_name[1])
+
+samples.mut <- query.mut$results[[1]]$cases
+
+
+query.mut.down <- GDCquery(project = cancerType, 
+                           data.category = "Simple nucleotide variation", 
+                           data.type = "Simple somatic mutation",
+                           access = "open", 
+                           sample.type = c("Primary solid Tumor"),
+                           legacy = TRUE,
+                           barcode = samples.mut,
+                           file.type = query.mut$results[[1]]$file_name[1])
+
+GDCdownload(query.mut.down,
+            directory = PathDir)
+
+data.mut <- GDCprepare(query.mut.down, 
+                       directory = PathDir)
+
+
+```
+
+
+## GDC TCGA microRNA Expression using TCGAbiolinks
+
+You can easily search TCGA samples, download and prepare a matrix of microRNA Expression
+```{r, eval = FALSE}
+cancerType <- "TCGA-BRCA"
+query.miR <- GDCquery(project = cancerType, 
+                      data.category = "Gene expression",
+                      data.type = "miRNA gene quantification",
+                      platform = "Illumina HiSeq",
+                      file.type = "hg19.mirbase20.mirna.quantification",
+                      legacy = TRUE)
+samples.miR <- query.miR$results[[1]]$cases
+
+query.miR.down <- GDCquery(project = cancerType, 
+                      data.category = "Gene expression",
+                      data.type = "miRNA gene quantification",
+                      platform = "Illumina HiSeq",
+                      file.type = "hg19.mirbase20.mirna.quantification",
+                      legacy = TRUE,
+                      barcode = TNBCsamplesmiRlong)
+
+GDCdownload(query.miR.down,
+            directory = PathDir)
+
+data.miR <- GDCprepare(query.miR.down, 
+                       directory = PathDir)
+
+```
+
+## GDC TCGA Clinical Data using TCGAbiolinks
+
+You can easily search TCGA samples, download and prepare a matrix of clinical data
+```{r, eval = FALSE}
+cancerType <- "BRCA"
+dataClin <- GDCquery_clinic(project = paste0("TCGA-",cancerType),type = "clinical")
+```
+
+## GTEx Data using TCGAbiolinks
+
+You can easily search GTEx samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+data_gtex_brain <- TCGAquery_recount2("gtex", tissue = "brain")
+
+```
+
+## IHEC gene expression data using DeepBlueR
+
+You can easily search IHEC Blueprint samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+
+
+require(DeepBlueR)
+require(dplyr)
+
+
+# List all BLUEPRINT samples
+blueprint_samples <- deepblue_list_samples(
+    extra_metadata = list("source" = "BLUEPRINT Epigenome"))
+
+# Extract their ids
+blueprint_samples_ids <- deepblue_extract_ids(blueprint_samples)
+
+# Select gene expression data. We assign gene names using Gencode 22
+gene_exprs_query <- deepblue_select_expressions(sample_ids = blueprint_samples_ids,
+                                                expression_type = "gene",
+                                                gene_model = "gencode v22")
+
+gene_exprs_query <- deepblue_select_expressions(sample_ids = blueprint_samples_ids,
+                                                expression_type = "gene",
+                                                gene_model = "gencode v19")
+
+
+
+# We request the data and define the output format
+request = deepblue_get_regions(query_id = gene_exprs_query,
+                               "@GENE_ID(gencode v19),FPKM,@BIOSOURCE,@SAMPLE_ID")
+
+# We download the data
+gene_regions <- deepblue_download_request_data(request)
+
+# We retain a table mapping sample ids to bisources
+sample_names <- dplyr::select(gene_regions, `@BIOSOURCE`, `@SAMPLE_ID`) %>%
+    dplyr::distinct()
+
+# We filter out duplicated gene entries
+genes_one_sample <- dplyr::filter(gene_regions, `@SAMPLE_ID` == "s10678")
+duplicated_genes <- genes_one_sample[
+    which(duplicated(genes_one_sample$`@GENE_ID(gencode v22)`)),
+    "@GENE_ID(gencode v22)"]
+
+
+genes_one_sample <- dplyr::filter(gene_regions, `@SAMPLE_ID` == "s10678")
+duplicated_genes <- genes_one_sample[
+    which(duplicated(genes_one_sample$`@GENE_ID(gencode v19)`)),
+    "@GENE_ID(gencode v19)"]
+
+
+# We convert the gene expression from a list to a data frame and subsequently...
+genes_matrix = dplyr::filter(gene_regions,
+                             !(`@GENE_ID(gencode v22)` %in% duplicated_genes)) %>%
+    dplyr::select(-`@BIOSOURCE`) %>%
+    tidyr::spread(key = `@SAMPLE_ID`, value = FPKM)
+
+# ...to a numeric matrix
+genes <- genes_matrix[,1]
+genes_matrix <- data.matrix(genes_matrix[,-1])
+rownames(genes_matrix) <- genes
+
+### OUTPUT
+### genes_matrix : The gene expression matrix for all 276 BLUEPRINT samples
+### sample_names : A mapping table from sample id to cell type / biosource
+
+save(genes_matrix, file = "IHEC_genes_matrix.Rdata")
+save(sample_names, file = "IHEC_Sample_names.rdata")
+
+```
+
+## GEO gene expression data using MoonlightR and GEOquery
+
+## Preparing Gene Expression for GEO (platform and GSE) for Nazor et al.,  Cell Stem Cell 2012 
+
+You can easily search GEO samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+require(MoonlightR)
+library(devtools)
+install_github("ibsquare/MoonlightR") 
+
+dataNazor <- getDataGEO(GEOobject = "GSE30652",
+                                    platform =  "GPL6947")
+
+require(SummarizedExperiment)
+GSE30652 <- as.data.frame(exprs(dataNazor))
+GSE30652_non_norm <- cbind(ILMN = rownames(GSE30652),
+                           IDmean = rowMeans(GSE30652),
+                           GSE30652)
+
+
+
+dataNazor_samples <- pData(dataNazor)
+dataNazor_samples <- as.data.frame(dataNazor_samples)
+dataNazor_samples <- subset(dataNazor_samples,
+                              select = c("geo_accession","characteristics_ch1.2"))
+colnames(dataNazor_samples)[2] <- "CellType"
+
+dataNazor_samples$CellType <- gsub("cell type: ","",dataNazor_samples$CellType)
+dataNazor_samples$CellType <- gsub(", undifferentiated","",dataNazor_samples$CellType)
+
+GPL6947_13512 <- fData(dataNazor)
+GPL6947_13512_annot <- as.data.frame(GPL6947_13512)
+GPL6947_13512_annot <- subset(GPL6947_13512_annot,
+                              select = c("ID","Gene.symbol"))
+
+
+
+GSE30652_merge <- merge(x = GPL6947_13512_annot,
+                        y = GSE30652_non_norm,
+                        by.x = "ID",
+                        by.y = "ILMN")
+
+
+GSE30652_merge <- GSE30652_merge[order(GSE30652_merge$IDmean,decreasing = TRUE),]
+GSE30652_merge <- GSE30652_merge[!duplicated(GSE30652_merge$Gene.symbol),]
+NazorMatrix <- GSE30652_merge
+rownames(NazorMatrix) <- NazorMatrix$Gene.symbol
+
+NazorMatrix <- NazorMatrix[,dataNazor_samples$geo_accession]
+
+
+
+```
+
+
+# Validation of Stemness signature in external dataset. Nazor et al.,  Cell Stem Cell 2012 
+```{r, eval = FALSE}
+# Firstly we have previously prepared the Gene Expression matrix (genes in rows , samples in columns) 
+# for Nazor's dataset using Moonlight and getGEO's function.
+
+TCGA_mRNA_StemScoreTable <- TCGAanalyze_Stemness(stemSig = PCBC_stemSig,
+                                          dataGE = NazorMatrix)
+
+
+
+tab_mRNASi <- TCGA_mRNA_StemScoreTable
+
+tab_mRNASi_merged <- merge(x = tab_mRNASi,
+                    y = dataNazor_samples,
+                    by.x = "Sample",
+                    by.y = "geo_accession")
+require(ggplot2)
+require(ggpubr)
+
+colnames(tab_mRNASi_merged)[3] <- "mRNASi"
+
+tab_mRNASi_merged[tab_mRNASi_merged$CellType %in% "embryonic stem cell","CellType"] <- "ES"
+tab_mRNASi_merged[tab_mRNASi_merged$CellType %in% "induced pluripotent stem cell","CellType"] <- "IPS"
+tab_mRNASi_merged[tab_mRNASi_merged$CellType %in% "parthenogentic embryonic stem cell","CellType"] <- "Parthenogentic"
+tab_mRNASi_merged[tab_mRNASi_merged$CellType %in% "Somatic.Primary","CellType"] <- "Primary"
+tab_mRNASi_merged[tab_mRNASi_merged$CellType %in% "Somatic.Tissue","CellType"] <- "Tissue"
+
+tab_mRNASi_merged <- tab_mRNASi_merged[order(tab_mRNASi_merged$mRNASi, decreasing = FALSE),]
+library(forcats)
+p <- ggplot(data=tab_mRNASi_merged, aes(x=Sample, y=mRNASi, fill = CellType)) +
+    geom_bar(stat="identity")+
+    scale_colour_gradient2()+
+    #coord_flip()+
+   # ylim(0, 15)+
+    #scale_x_discrete(limits = df1$Tissue)+
+    theme_classic() +
+    theme(axis.title.x=element_blank(),
+                          axis.text.x=element_blank(),
+                          axis.ticks.x=element_blank())+
+    scale_fill_manual("legend", values = c("Primary" = "orange",
+                                           "Parthenogentic" = "blue",
+                                           "Tissue" = "darkgreen",
+                                           "ES" = "red",
+                                           "IPS" = "pink"))
+p <- p + theme(legend.position="bottom")
+
+p <- p + aes(x = fct_inorder(Sample))
+ggsave(p, file = "Validation_mRNASi_Nazor.png", width = 6,height = 6)
+
+
+```
+
+
+The result from TCGAanalyze_Stemness validation in Nazor's Dataset is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("Validation_mRNASi_Nazor.png")
+grid.raster(img)
+```
+
+
+# Validation of Stemness signature in external dataset. IHEC  Author et al.,  Cell 2016 
+```{r, eval = FALSE}
+
+# stemness score with IHEC samples
+load("./IHEC_genes_matrix.Rdata")
+load("./IHEC_Sample_names.rdata")
+IHECMatrix <- genes_matrix
+require(stringr)
+IHEC_annot <- sample_names
+colnames(IHEC_annot) <- c("Diffname_short","X1")
+IHEC_annot <- as.data.frame(IHEC_annot)
+
+library("biomaRt")
+ensemblsIDS <- str_split_fixed(rownames(IHECMatrix),"\\.",2)[,1]
+rownames(IHECMatrix)<- ensemblsIDS
+
+IHEC_annot_common <- IHEC_annot[IHEC_annot$X1 %in% colnames(IHECMatrix),]
+
+
+# mapping Ensembl IDs to gene Symbol
+
+require(TCGAbiolinks)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+gene.df <- bitr(ensemblsIDS, fromType = "ENSEMBL",
+                toType = c( "ENTREZID", "SYMBOL"),
+                OrgDb = org.Hs.eg.db)
+
+
+IHECMatrix_sel <- IHECMatrix[gene.df$ENSEMBL,]
+rownames(IHECMatrix_sel) <-gene.df$SYMBOL
+IHECMatrix_sel <- as.data.frame(IHECMatrix_sel)
+
+IHECMatrix_sel_filt <- TCGAanalyze_Filtering(tabDF = IHECMatrix_sel,
+                                             method = "quantile",
+                                             qnt.cut = 0.25)
+
+TCGA_mRNA_StemIHEC <- TCGAanalyze_Stemness(stemSig = PCBC_stemSig,
+                                                 dataGE = IHECMatrix_sel_filt)
+
+colnames(TCGA_mRNA_StemIHEC)[3] <- "mRNASi"
+colnames(IHEC_annot)[1] <- "CellType"
+colnames(IHEC_annot)[2] <- "Sample"
+TCGA_mRNA_StemIHEC_merge<- merge(x = TCGA_mRNA_StemIHEC,
+                                 y = IHEC_annot,
+                                 by.x = "Sample",
+                                 by.y = "Sample")
+tab_mRNASi_merged <- TCGA_mRNA_StemIHEC_merge
+
+CellType <- table(tab_mRNASi_merged$CellType)
+
+
+
+CellType_filt <- CellType[CellType > 5]
+
+tab_mRNASi_merged_filt <- tab_mRNASi_merged[tab_mRNASi_merged$CellType %in% names(CellType_filt), ]
+tab_mRNASi_merged <- tab_mRNASi_merged_filt
+
+
+tab_mRNASi_merged <- tab_mRNASi_merged[order(tab_mRNASi_merged$mRNASi, decreasing = FALSE),]
+require(ggplot2)
+library(forcats)
+p <- ggplot(data=tab_mRNASi_merged, aes(x=Sample, y=mRNASi, fill = CellType)) +
+    geom_bar(stat="identity")+
+    scale_colour_gradient2()+
+    #coord_flip()+
+    # ylim(0, 15)+
+    #scale_x_discrete(limits = df1$Tissue)+
+    theme_classic() +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())
+p <- p + theme(legend.position="right")
+
+p <- p + aes(x = fct_inorder(Sample))
+p <- p + theme(text = element_text(size=14))
+ggsave(p, file = "Validation_mRNASi_IHEC.png", width = 12,height = 6)
+```
+
+
+The result from TCGAanalyze_Stemness validation in IHEC's Dataset is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("Validation_mRNASi_IHEC.png")
+grid.raster(img)
+```
+
+
+# Generating Stemness score for TCGA gene expression data (mRNASi). Malta et al. Cell, 2018 
+
+```{r, eval = FALSE}
+# Firstly we load Gene Expression matrix (genes in rows , samples in columns) 
+# from a previous generated pancancer gene expression matrix
+load("~/Dropbox (Personal)/Umiami/TCGAanalysis/Stemness/dataFilt_panCancer33new.Rdata")
+
+curCancer <- "BRCA"
+# We have previously generated a table with 33 cancer types barcodes and molecular subtypes.
+
+dataSubt_PanCancer <- PanCancerAtlas_subtypes()
+
+# Selecting TCGA breast cancer
+
+dataSubt_curCancer <- dataSubt_PanCancer[dataSubt_PanCancer$cancer.type %in% "BRCA",]
+
+commonSamples <- intersect(dataSubt_curCancer$pan.samplesID, colnames(dataFilt))
+
+dataFilt_curCancer <- dataFilt[,commonSamples]
+load("~/Dropbox (Personal)/Umiami/Github/TCGAbiolinks/data/PCBC_stemSig.rda")
+
+TCGA_mRNA_StemScoreTable <- TCGAanalyze_Stemness(stemSig = PCBC_stemSig,
+                                          dataGE = dataFilt_curCancer)
+
+colnames(TCGA_mRNA_StemScoreTable)[1] <- "barcode"
+
+sampleNT <- TCGAquery_SampleTypes(barcode = TCGA_mRNA_StemScoreTable$barcode,typesample = "NT")
+sampleTP <- TCGAquery_SampleTypes(barcode = TCGA_mRNA_StemScoreTable$barcode,typesample = "TP")
+#sampleTM <- TCGAquery_SampleTypes(barcode = TCGA_mRNA_StemScoreTable$barcode,typesample = "TM")
+#sampleTAM <- TCGAquery_SampleTypes(barcode = TCGA_mRNA_StemScoreTable$barcode,typesample = "TAM")
+#sampleTB <- TCGAquery_SampleTypes(barcode = TCGA_mRNA_StemScoreTable$barcode,typesample = "TB")
+
+rownames(TCGA_mRNA_StemScoreTable) <- TCGA_mRNA_StemScoreTable$barcode
+
+TCGA_mRNA_StemScoreTable[sampleNT,"SampleType"] <- "NT"
+TCGA_mRNA_StemScoreTable[sampleTP,"SampleType"] <- "TP"
+#TCGA_mRNA_StemScoreTable[sampleTM,"SampleType"] <- "TM"
+#TCGA_mRNA_StemScoreTable[sampleTAM,"SampleType"] <- "TM"
+#TCGA_mRNA_StemScoreTable[sampleTB,"SampleType"] <- "TB"
+
+tab_mRNASi <- TCGA_mRNA_StemScoreTable
+
+tab_mRNASi_merged <- merge(x = tab_mRNASi,
+                    y = dataSubt_PanCancer,
+                    by.x = "barcode",
+                    by.y = "pan.samplesID")
+require(ggplot2)
+require(ggpubr)
+
+colnames(tab_mRNASi_merged)[3] <- "mRNASi"
+
+
+
+p<-ggplot(tab_mRNASi_merged, aes(x=SampleType, y=mRNASi, fill=SampleType))
+p <- p + theme_classic()
+
+p <- p +  theme(legend.position="none")
+p <- p + rotate_x_text(45)
+p <- p + geom_jitter(shape=16, position=position_jitter(0.2), color = "black")
+p <- p + geom_boxplot(position=position_dodge(1),outlier.colour = NA)
+p <- p + theme(text = element_text(size=20))
+ggsave(p , filename = "TCGA_BRCA_mRNASi_TP_NT.png",width = 5,height = 6)
+
+
+tab_mRNASi_merged_TP <- tab_mRNASi_merged[tab_mRNASi_merged$SampleType %in% "TP",]
+
+p<-ggplot(tab_mRNASi_merged_TP, aes(x=Subtype_Selected, y=mRNASi, fill=Subtype_Selected))
+p <- p + theme_classic()
+
+p <- p +  theme(legend.position="none")
+p <- p + rotate_x_text(45)
+p <- p + geom_jitter(shape=16, position=position_jitter(0.2), color = "black")
+p <- p + geom_boxplot(position=position_dodge(1),outlier.colour = NA)
+p <- p + theme(text = element_text(size=20))
+ggsave(p , filename = "TCGA_BRCA_mRNASi_subtypes.png",width = 5,height = 6)
+
+
+
+```
+
+The result from TCGAanalyze_Stemness is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("TCGA_BRCA_mRNASi_TP_NT.png")
+grid.raster(img)
+```
+
+The result from TCGAanalyze_Stemness with molecular subtypes is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("TCGA_BRCA_mRNASi_subtypes.png")
+grid.raster(img)
+```
+
+
+# Generating Stemness score for TCGA LGG and GBM gene expression data (mRNASi). Malta et al. Cell, 2018 
+
+```{r, eval = FALSE}
+
+# working with LGG and GBM
+curCancer <- c("LGG","GBM")
+# We have previously generated a table with 33 cancer types barcodes and molecular subtypes.
+require(TCGAbiolinks)
+dataSubt_PanCancer <- PanCancerAtlas_subtypes()
+
+# Selecting TCGA breast cancer
+
+dataSubt_curCancer <- dataSubt_PanCancer[dataSubt_PanCancer$cancer.type %in% curCancer,]
+
+sampleCurCancer <- colnames(dataFilt)
+sampleCurCancer <- sampleCurCancer[substr(sampleCurCancer,1,12) %in% dataSubt_curCancer$pan.samplesID]
+
+dataFilt_curCancer <- dataFilt[,sampleCurCancer]
+load("~/Dropbox (Personal)/Umiami/Github/TCGAbiolinks/data/PCBC_stemSig.rda")
+
+TCGA_mRNA_StemScoreTable <- TCGAanalyze_Stemness(stemSig = PCBC_stemSig,
+                                                 dataGE = dataFilt_curCancer)
+
+colnames(TCGA_mRNA_StemScoreTable)[1] <- "barcode"
+
+
+tab_mRNASi <- TCGA_mRNA_StemScoreTable
+tab_mRNASi <- cbind(barcode12 = substr(tab_mRNASi$barcode,1,12),
+                    tab_mRNASi)
+tab_mRNASi$barcode12 <- as.character(tab_mRNASi$barcode12)
+
+
+tab_mRNASi_merged <- merge(x = tab_mRNASi,
+                           y = dataSubt_PanCancer,
+                           by.x = "barcode12",
+                           by.y = "pan.samplesID")
+require(ggplot2)
+require(ggpubr)
+
+colnames(tab_mRNASi_merged)[4] <- "mRNASi"
+
+p<-ggplot(tab_mRNASi_merged, aes(x=Subtype_Selected, y=mRNASi, fill=Subtype_Selected))
+p <- p + theme_classic()
+p <- p +  theme(legend.position="none")
+p <- p + rotate_x_text(45)
+p <- p + geom_jitter(shape=16, position=position_jitter(0.2), color = "black")
+p <- p + geom_boxplot(position=position_dodge(1),outlier.colour = NA)
+p <- p + theme(text = element_text(size=20))
+ggsave(p , filename = "TCGA_LGG_GBM_mRNASi_subtypes.png",width = 5,height = 6)
+```
+
+
+The result from TCGAanalyze_Stemness for LGG and GBM is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("TCGA_LGG_GBM_mRNASi_subtypes.png")
+grid.raster(img)
+```
+
+
+# Stemness index is associated with overall survival (Glioma example)
+
+```{r, eval = FALSE}
+
+#working with survival glioma
+
+tab_mRNASi_merged <- cbind(mRNASi_level = rep("mRNASi mod",nrow(tab_mRNASi_merged)),
+                           tab_mRNASi_merged)
+
+tabSi<- tab_mRNASi_merged
+tabSi$mRNASi_level <- as.character(tabSi$mRNASi_level)
+
+tabSi[tabSi$mRNASi < quantile(tabSi$mRNASi,1/3),"mRNASi_level"] <- "mRNASi Low"
+tabSi[tabSi$mRNASi > quantile(tabSi$mRNASi,2/3),"mRNASi_level"] <- "mRNASi High"
+
+
+require(TCGAbiolinks)
+
+dataClin_LGG <- GDCquery_clinic(project = "TCGA-LGG",type = "clinical")
+dataClin_GBM <- GDCquery_clinic(project = "TCGA-GBM",type = "clinical")
+
+dataClin_LGG_GBM <- rbind(dataClin_LGG,dataClin_GBM)
+
+dataClin_LGG_GBM <- dataClin_LGG_GBM[dataClin_LGG_GBM$submitter_id %in% tabSi$barcode12,]
+
+dataClin_merged <- merge(x = dataClin_LGG_GBM,
+                         y = tabSi,
+                         by.x = "submitter_id",
+                         by.y = "barcode12")
+
+
+
+
+p <- TCGAanalyze_survival(dataClin_merged,
+                          clusterCol = "mRNASi_level",
+                          conf.int = FALSE,
+                          main = "TCGA LGG GBM mRNASi", 
+                          height = 10,
+                          width=10,
+                          risk.table = TRUE,
+                          filename = NULL)
+
+p <- p$plot
+
+p <- p  + theme(legend.position = "bottom")
+
+ggsave(p , filename = "TCGA_LGG_GBM_mRNASi_survival.png",width = 5,height = 6)
+```
+
+
+The result from the Stemness-survival association for LGG and GBM is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("TCGA_LGG_GBM_mRNASi_survival.png")
+grid.raster(img)
+```
+
+
+In this section we generate the Immune subtypes for TCGA and GEO tumors.
+Figure1C readapted from Thorsson et al., Immunity, 2018, to summarize features of six different immune subtypes.
+
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("ImmuneLandscape_Fig1B.png")
+grid.raster(img)
+```
+
+
+# KM survival analysis of TCGA KIRC samples with Immune Subtypes from Thorsson et al., Immunity, 2018
+```{r, eval = FALSE}
+download.file(url = "https://ars.els-cdn.com/content/image/1-s2.0-S1074761318301213-mmc2.xlsx",
+               destfile = "X1_s2_0_S1074761318301213_mmc2")
+X1_s2_0_S1074761318301213_mmc2 <- read_excel("X1_s2_0_S1074761318301213_mmc2")
+X1_s2_0_S1074761318301213_mmc2 <- as.data.frame(X1_s2_0_S1074761318301213_mmc2)
+
+CancerType <- c("KIRC")
+
+ImmuneSubtypes <- as.data.frame(X1_s2_0_S1074761318301213_mmc2)
+
+ImmuneSubtypes <- ImmuneSubtypes[ImmuneSubtypes$`TCGA Study` %in% CancerType,]
+ImmuneSubtypes <- ImmuneSubtypes[ImmuneSubtypes$`Immune Subtype`!="NA",]
+
+dataClin_KIRC <- GDCquery_clinic(project = "TCGA-KIRC",type = "clinical")
+
+dataClin_merged <- merge(x = dataClin_KIRC,
+                         y = ImmuneSubtypes,
+                         by.x = "submitter_id",
+                         by.y = "TCGA Participant Barcode")
+
+
+p <- TCGAanalyze_survival(dataClin_merged,
+                          clusterCol = "Immune Subtype",
+                          conf.int = FALSE,
+                          main = "TCGA KIRC Immune Subtypes",
+                          height = 10,
+                          width=10,
+                          risk.table = TRUE,
+                          filename = NULL)
+
+p <- p$plot
+
+p <- p  + theme(legend.position = "right")
+
+ggsave(p , filename = "TCGA_KIRC_ImmuneSubtypes_survival.png",width = 10,height = 6)
+
+```
+
+The result from the Immune subtypes -survival association for BRCA samples is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("TCGA_KIRC_ImmuneSubtypes_survival.png")
+grid.raster(img)
+```
+
+# Immune Subtypes for GEO samples (KIRC example) using data from Jones et al.,Clin Cancer Res 2005  (16115910)
+
+```{r, eval = FALSE}
+
+require(MoonlightR)
+ 
+#Jones J, Otu H, Spentzos D, Kolia S et al. Gene signatures of progression and metastasis in renal cell cancer. 
+# Clin Cancer Res 2005 Aug 15;11(16):5730-9. PMID: 16115910
+
+dataGEO_KIRC<- getDataGEO(GEOobject = "GSE15641",
+                        platform =  "GPL96")
+require(SummarizedExperiment)
+
+GSE15641 <- as.data.frame(exprs(dataGEO_KIRC))
+GSE15641_non_norm <- cbind(ILMN = rownames(GSE15641),
+                           IDmean = rowMeans(GSE15641),
+                           GSE15641)
+
+GSE15641_annot <- fData(dataGEO_KIRC)
+GSE15641_annot <- as.data.frame(GSE15641_annot)
+GSE15641_annot <- subset(GSE15641_annot,
+                              select = c("ID","Gene.symbol"))
+
+
+dataGEO_samples <- pData(dataGEO_KIRC)
+dataGEO_samples <- as.data.frame(dataGEO_samples)
+dataGEO_samples <- subset(dataGEO_samples,
+                            select = c("geo_accession","source_name_ch1"))
+colnames(dataGEO_samples)[2] <- "CellType"
+
+dataGEO_samples <- dataGEO_samples[dataGEO_samples$CellType %in% "cancerous human kidney tissue, clear cell RCC",]
+
+GSE15641_merge <- merge(x = GSE15641_annot,
+                        y = GSE15641_non_norm,
+                        by.x = "ID",
+                        by.y = "ILMN")
+
+
+GSE15641_merge <- GSE15641_merge[order(GSE15641_merge$IDmean,decreasing = TRUE),]
+GSE15641_merge <- GSE15641_merge[!duplicated(GSE15641_merge$Gene.symbol),]
+GSE15641_Matrix <- GSE15641_merge
+rownames(GSE15641_Matrix) <- GSE15641_Matrix$Gene.symbol
+
+GSE15641_Matrix <- GSE15641_Matrix[,dataGEO_samples$geo_accession]
+
+dataImmuneSubtype <- TCGAanalyze_ImmuneSubtypes(ImmuneMW = ImmuneMW,
+                                                dataGE = GSE15641_Matrix)
+
+```
+
+
+## Oncogenic processes and driver genes using MoonlightR
+
+To include some examples from
+http://bioconductor.org/packages/release/bioc/vignettes/MoonlightR/inst/doc/Moonlight.html
+
+And some figures from
+https://www.sciencedirect.com/science/article/pii/S0092867418303131
+
+
+
+
+# Session Information
+******
+```{r sessionInfo}
+sessionInfo()
+```
+
