@@ -1,11 +1,48 @@
 ---
 title: "Bioinformatics tools to integrate and understand molecular changes associated with Immune Response, Stemness and Oncogenic processes: A PanCancer study."
-bibliography: bibliography.bib    
+author: "Antonio Colaprico, Lily Wang, & Xi Chen"
+date: "`r Sys.Date()`"
+output:
+  BiocStyle::html_document:
+    number_sections: yes
+    toc: true
 vignette: >
-    %\VignetteIndexEntry{7. Analyzing and visualizing TCGA data}
-    %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Bioinformatics tools TCGAbiolinks Moonlight and DeepBlueR}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
-  
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  cache = FALSE,
+  comment = "#>"
+)
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(knitr)
+#library(papeR)
+```
+
+
+# Instructors
+
+* Dr. Antonio colaprico^[Department of Public Health Sciences, Miller School of Medicine, The University of Miami, Miami, FL] (<axc1833@med.miami.edu>)
+* Prof. Lily Wang^[Department of Public Health Sciences, Miller School of Medicine; McDonald Foundation Department of Human Genetics; The University of Miami, Miami, FL] (<lily.wang@med.miami.edu>)
+* Prof. Steven Chen^[Department of Public Health Sciences, Miller School of Medicine; Sylvester Comprehensive Cancer Center; The University of Miami, Miami, FL] (<steven.chen@med.miami.edu>)
+
+
+# Workshop Description
+
+Recently, The Cancer Genome Atlas (TCGA’s) Pan-Cancer Atlas initiative presented a comprehensive collection of 27 studies
+covering 11,000 patient tumors from 33 cancer types. These studies investigated cancer complexity from different angles by integrating multi -omics and clinical data. In particular, computational analyses have led to the identification of 299 cancer-driver genes and over 3,400 driver mutations. However, it still remains critical to clarify the consequences of each alteration and the underlying biological effects. 
+We will discuss several computational tools that are useful in clarifying gene functions when performing integrative analysis of multi-omics datasets. In order to deal with the challenges of data retrieval and integration, TCGAbiolinks (Colaprico et al., 2016)
+and DeepBlueR (Albrecht et al., 2017) were developed to retrieve data from TCGA, CPTAC, GTEx, GEO and IHEC, Blueprint, ENCODE, Roadmap, respectively. Tumor-specific cancer-driver-gene events and downstream impact can be elucidated with MoonlightR by integrating these datasets (Colaprico et al. 2018) (). TCGAbiolinks and MoolightR have been used successfully in multiple studies for oncogenic
+processes identification (Ding et al., 2018), oncogenic clinically actionable driver genes discovery (Bailey et al., 2018), and
+comprehensive immune landscape characterization (Thorsson et al., 2018)
+
+
 # Workshop: overview 
 
  In this workshop we will show the capability of TCGAbiolinks and Moonlight, to integrate multi -omics data from different consortium and to reproduce the six immune subtypes from TCGA PanCancer and how features (Immune Subtypes, Oncogenic Processes, Driver Genes and Stemness) can be used by the end user to expand their understating of their own un-published data. 
@@ -17,12 +54,7 @@ The workshop is organized in 4 subsections:
 3. Oncognic Processes and Driver Genes
 4. Stemness scores
  
-  
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(dpi = 300)
-knitr::opts_chunk$set(cache=FALSE)
-```
-  
+ 
 ```{r, eval= FALSE, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
 devtools::load_all(".")
 ```
