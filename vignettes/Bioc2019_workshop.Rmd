@@ -1,5 +1,5 @@
 ---
-title: "Bioinformatics tools to integrate and understand molecular changes associated with Immune Response, Stemness and Oncogenic processes: A PanCancer study."
+title: "Bioinformatics tools to integrate and understand molecular changes associated with Immune Response, Stemness and Oncogenic processes"
 author: "Antonio Colaprico, Lily Wang, & Xi Chen"
 date: "`r Sys.Date()`"
 output:
@@ -840,6 +840,7 @@ img <- readPNG("TCGA_LGG_GBM_mRNASi_survival.png")
 grid.raster(img)
 ```
 
+# Immune subtypes
 
 In this section we generate the Immune subtypes for TCGA and GEO tumors.
 Figure1C readapted from Thorsson et al., Immunity, 2018, to summarize features of six different immune subtypes.
@@ -851,8 +852,6 @@ img <- readPNG("ImmuneLandscape_Fig1B.png")
 grid.raster(img)
 ```
 
-
-# Immune subtypes
 
 ## KM survival analysis of TCGA KIRC samples with Immune Subtypes from Thorsson et al., Immunity, 2018
 ```{r, eval = FALSE}
@@ -956,10 +955,6 @@ dataImmuneSubtype <- TCGAanalyze_ImmuneSubtypes(ImmuneMW = ImmuneMW,
 
 To include some examples from
 http://bioconductor.org/packages/release/bioc/vignettes/MoonlightR/inst/doc/Moonlight.html
-
-And some figures from
-https://www.sciencedirect.com/science/article/pii/S0092867418303131
-
 
 
 
