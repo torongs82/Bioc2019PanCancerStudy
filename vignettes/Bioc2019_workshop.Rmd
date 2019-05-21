@@ -652,6 +652,8 @@ grid.raster(img)
 
 
 # Immune subtypes from Thorsson et al. (2018, PMID: 29628290)
+Thorsson et al. performed an extensive immunogenomic analysis of more than 10,000 tumors comprising 33 diverse cancer types by utilizing data compiled by TCGA. Across cancer types, we identified six immune subtypes—wound healing, IFN-\gamma dominant, inflammatory, lymphocyte depleted, immunologically quiet, and TGF-\beta dominant—characterized by differences in macrophage or lymphocyte signatures, Th1:Th2 cell ratio, extent of intratumoral heterogeneity, aneuploidy, extent of neoantigen load, overall cell proliferation, expression of immunomodulatory genes, and prognosis. 
+
 In this section we generate the Immune subtypes for TCGA and GEO tumor samples. 
 Figure1C is from Thorsson et al. (2018, PMID: 29628290), to summarize features of six different immune subtypes.
 
@@ -662,21 +664,12 @@ img <- readPNG("ImmuneSubtypes_workflow.png")
 grid.raster(img)
 ```
 
-## Immune Cell composition within Immune Subtypes
+
+## Survival analysis of TCGA KIRC samples with Immune Subtypes
+In the following example we will run a Kaplan-Meier Overall Survival Analysis for TCGA KIRC samples breaking by Immune Subtypes
 
 ```{r, eval = FALSE}
-download.file(url = "https://ars.els-cdn.com/content/image/1-s2.0-S1074761318301213-mmc2.xlsx",
-               destfile = "X1_s2_0_S1074761318301213_mmc2")
-X1_s2_0_S1074761318301213_mmc2 <- read_excel("X1_s2_0_S1074761318301213_mmc2")
-X1_s2_0_S1074761318301213_mmc2 <- as.data.frame(X1_s2_0_S1074761318301213_mmc2)
 
-tabImmune <- X1_s2_0_S1074761318301213_mmc2[,37:ncol(X1_s2_0_S1074761318301213_mmc2)]
-
-```
-
-
-## KM survival analysis of TCGA KIRC samples with Immune Subtypes
-```{r, eval = FALSE}
 download.file(url = "https://ars.els-cdn.com/content/image/1-s2.0-S1074761318301213-mmc2.xlsx",
                destfile = "X1_s2_0_S1074761318301213_mmc2")
 X1_s2_0_S1074761318301213_mmc2 <- read_excel("X1_s2_0_S1074761318301213_mmc2")
@@ -768,7 +761,7 @@ save(GSE15641_Matrix, file = "Jones_GSE15641.Rdata")
 # https://github.com/torongs82/Data/blob/master/GEO/Jones_GSE15641.Rdata
 load("Jones_GSE15641.Rdata")
 
-load("ImmuneMW.rda")
+load("ImmuneMW.rda") # from data folder
 dataImmuneSubtype <- TCGAanalyze_ImmuneSubtypes(ImmuneMW = ImmuneMW,
                                                 dataGE = GSE15641_Matrix)
 
