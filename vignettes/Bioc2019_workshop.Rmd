@@ -450,6 +450,22 @@ IHEC_sample_names <- sample_names
 
 save(IHEC_genes_matrix,  IHEC_sample_names, file = "IHEC_BLUEPRINT_geneExpr.Rdata")
 
+#> IHEC_genes_matrix[1:5,1:5]
+#                   s10271 s10272 s10275 s10276 s10279
+#ENSG00000000003.13   0.01   0.03   2.39   0.70   0.05
+#ENSG00000000005.5    0.00   0.00   0.00   0.00   0.00
+#ENSG00000000419.11  30.04  17.49  16.36   5.80  11.99
+#ENSG00000000457.12   3.29   2.63   2.70   0.78   1.91
+#ENSG00000000460.15   3.16   2.06   1.36   0.49   1.65
+
+#> head(IHEC_sample_names)
+#                          @BIOSOURCE @SAMPLE_ID
+#1:   CD8-positive, alpha-beta T cell     s10506
+#2:            germinal center B cell     s10678
+#3:         common myeloid progenitor     s10518
+#4: adult endothelial progenitor cell     s11176
+#5:            neutrophilic myelocyte     s10331
+#6:        common lymphoid progenitor     s10486
 ```
 
 ## `GEO gene expression` dataset
