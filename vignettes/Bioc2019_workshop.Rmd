@@ -83,14 +83,7 @@ The GDC supports several cancer genome programs at the NCI Center for Cancer Gen
 
 The end user can search TCGA's samples for a specific cancer of origin, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
-
 DataDir <- "~/Dropbox (Personal)/Umiami/TCGAanalysis/GDCdata/TCGA-BRCA"
-
-# Firstly we install TCGAbiolinks from Bioconductor or from GitHub
-
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install("TCGAbiolinks")
 
 require(TCGAbiolinks)
 
@@ -175,7 +168,7 @@ grid.raster(img)
 
 You can easily search TCGA samples, download and prepare a matrix of protein RPPA expression.
 ```{r, eval = FALSE}
-
+require(TCGAbiolinks)
 cancerType <- "BRCA"
 
 query.RPPA <- GDCquery(project = paste0("TCGA-",cancerType), 
@@ -275,6 +268,7 @@ data.met <- GDCprepare(query.met.down,
 
 You can easily search TCGA samples, download and prepare a matrix of Mutations.
 ```{r, eval = FALSE}
+require(TCGAbiolinks)
 cancerType <- "TCGA-BRCA"
 query.mut <- GDCquery(project = cancerType, 
                       data.category = "Simple nucleotide variation", 
@@ -316,10 +310,11 @@ data.mut <- GDCprepare(query.mut.down,
 ```
 
 
-## `TCGA microRNA Expression`
+## `TCGA microRNA Expression` Illumina HiSeq
 
 You can easily search TCGA samples, download and prepare a matrix of microRNA Expression
 ```{r, eval = FALSE}
+require(TCGAbiolinks)
 cancerType <- "TCGA-BRCA"
 query.miR <- GDCquery(project = cancerType, 
                       data.category = "Gene expression",
@@ -349,6 +344,7 @@ data.miR <- GDCprepare(query.miR.down,
 
 You can easily search TCGA samples, download and prepare a matrix of clinical data
 ```{r, eval = FALSE}
+require(TCGAbiolinks)
 cancerType <- "BRCA"
 dataClin <- GDCquery_clinic(project = paste0("TCGA-",cancerType),type = "clinical")
 ```
@@ -360,8 +356,24 @@ You can easily search GTEx samples, download and prepare a matrix of gene expres
 #Genotype-Tissue Expression (GTEx) project, which is another large-scale repository cataloging gene expression from healthy individuals.
 
 # In the following example we will retrieve data from brain's tissue.
+require(TCGAbiolinks)
 
 data_gtex_brain <- TCGAquery_recount2("gtex", tissue = "brain")
+
+Gtex_brain_annotation <- colData(data_gtex_brain$gtex_brain)
+sort(table(Gtex_brain_annotation$smtsd))
+
+data_gtex_brain_GeneExpr <- assay(data_gtex_brain$gtex_brain,1)
+
+# data_gtex_brain_GeneExpr[1:5,1:5]
+#SRR2166176 SRR2167642 SRR607445 SRR663753 SRR1485892
+#ENSG00000000003.14      98669     122656     74728     56933      69009
+#ENSG00000000005.5         764       1018       760      2105        151
+#ENSG00000000419.12    1076085    1034842     56668    207245     124647
+#ENSG00000000457.13     746248     752634     48502    121776      66762
+#ENSG00000000460.16     603111     588176     25143     55928      34473
+
+
 
 ```
 
