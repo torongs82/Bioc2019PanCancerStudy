@@ -12,6 +12,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -166,14 +167,16 @@ grid.raster(img)
 To retrieve other datatypes using TCGAbiolinks it is possible to follow the example for gene expression but replacing the parameters as shown in the following table:
 
 
+|   |data.type                         |data.category               |platform                       |file.type                           |
+|:--|:---------------------------------|:---------------------------|:------------------------------|:-----------------------------------|
+|1  |Gene expression quantification    |Gene expression             |Illumina HiSeq                 |results                             |
+|2  |Protein expression quantification |Protein expression          |MDA_RPPA_Core                  |expression                          |
+|3  |Copy number segmentation          |Copy number variation       |Affymetrix SNP Array 6.0       |nocnv_hg19.seg                      |
+|4  |Methylation Beta Value            |DNA methylation             |Illumina Human Methylation 450 |HumanMethylation450                 |
+|5  |Simple somatic mutation           |Simple nucleotide variation |NA                             |NA                                  |
+|6  |miRNA gene quantification         |Gene expression             |Illumina HiSeq                 |hg19.mirbase20.mirna.quantification |
+|7  |NA                                |Clinical                    |NA                             |xml      
 
-```{r, eval = TRUE, echo = FALSE,size = 8}
-library(TCGAbiolinks)
-load("./data/TableDataTypes.rda")
-knitr::kable(TableDataTypes, 
-             caption = "Multi -omics data in TCGAbiolinks",
-             row.names = TRUE)
-```
 
 
 ## `GTEx gene expression` data
