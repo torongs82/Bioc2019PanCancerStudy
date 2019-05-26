@@ -14,7 +14,7 @@ Description: Recently, The Cancer Genome Atlas (TCGA’s) Pan-Cancer Atlas initi
         processes identification (Ding et al., 2018), oncogenic clinically actionable driver genes discovery (Bailey et al., 2018), and
         comprehensive immune landscape characterization (Thorsson et al., 2018)
 Depends:
-    R (>= 3.5)
+    R (>= 3.6)
 Imports:
     TCGAbiolinks,
     MoonlightR,
@@ -22,6 +22,16 @@ Imports:
     SummarizedExperiment,
     dplyr
 License: Creative Commons Attribution 4.0 International License
+biocViews: DNAMethylation,
+    DifferentialMethylation,
+    GeneRegulation,
+    GeneExpression,
+    MethylationArray,
+    DifferentialExpression,
+    Pathways,
+    Network,
+    Sequencing,
+    Survival
 Encoding: UTF-8
 LazyData: true
 Suggests: 
