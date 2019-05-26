@@ -1,4 +1,5 @@
-^Bioc2019_PanCancerStudy\.Rproj$
+^Bioc2019PanCancerStudy\.Rproj$
 ^\.Rproj\.user$
 ^inst/extdata/*$
 ^vignettes/rsconnect/*$
+^Bioc2019PanCancerStudy/.git/objects/pack/$
