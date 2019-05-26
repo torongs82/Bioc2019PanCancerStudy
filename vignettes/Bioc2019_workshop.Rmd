@@ -3,21 +3,21 @@ title: "Bioinformatics tools for integrating and understanding molecular changes
 author: "Antonio Colaprico, Gabriel Odom, Lily Wang, & Xi Chen"
 date: "`r Sys.Date()`"
 output:
-  BiocStyle::html_document:
+BiocStyle::html_document:
     number_sections: yes
     toc: true
 vignette: >
-  %\VignetteIndexEntry{Bioinformatics tools TCGAbiolinks Moonlight and DeepBlueR}
-  %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{Bioinformatics tools TCGAbiolinks Moonlight and DeepBlueR}
+    %\VignetteEncoding{UTF-8}
+    %\VignetteEngine{knitr::rmarkdown}
 ---
 
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  cache = FALSE,
-  comment = "#>"
+    collapse = TRUE,
+    cache = FALSE,
+    comment = "#>"
 )
 ```
 
