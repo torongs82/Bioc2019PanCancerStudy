@@ -1,0 +1,4 @@
+^Bioc2019_PanCancerStudy\.Rproj$
+^\.Rproj\.user$
+^inst/extdata/*$
+^vignettes/rsconnect/*$

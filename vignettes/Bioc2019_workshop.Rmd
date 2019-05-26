@@ -1,6 +1,6 @@
 ---
 title: "Bioinformatics tools for integrating and understanding molecular changes associated with with Immune Response, Stemness and Oncogenic processes"
-author: "Antonio Colaprico, Lily Wang, & Xi Chen"
+author: "Antonio Colaprico, Gabriel Odom, Lily Wang, & Xi Chen"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
@@ -30,6 +30,7 @@ library(knitr)
 # Instructors
 
 * Dr. Antonio colaprico^[Department of Public Health Sciences, Miller School of Medicine, The University of Miami, Miami, FL] (<axc1833@med.miami.edu>)
+* Dr. Gabriel J. Odom^[Department of Public Health Sciences, Miller School of Medicine, The University of Miami, Miami, FL] (<gabriel.odom@med.miami.edu>)
 * Prof. Lily Wang^[Department of Public Health Sciences, Miller School of Medicine; Dr. McDonald Foundation Department of Human Genetics; Sylvester Comprehensive Cancer Center; The University of Miami, Miami, FL] (<lily.wang@med.miami.edu>)
 * Prof. Steven Chen^[Department of Public Health Sciences, Miller School of Medicine; Sylvester Comprehensive Cancer Center; The University of Miami, Miami, FL] (<steven.chen@med.miami.edu>)
 
@@ -39,7 +40,9 @@ library(knitr)
 
 Recently, The Cancer Genome Atlas (TCGA’s) Pan-Cancer Atlas initiative presented a comprehensive collection of 27 studies
 covering 11,000 patient tumors from 33 cancer types. These studies investigated cancer complexity from different angles by integrating multi -omics and clinical data. In particular, computational analyses have led to the identification of 299 cancer-driver genes and over 3,400 driver mutations. However, it still remains critical to clarify the consequences of each alteration and the underlying biological effects. 
-We will discuss several computational tools that are useful in clarifying gene functions when performing integrative analysis of multi-omics datasets. In order to deal with the challenges of data retrieval and integration, TCGAbiolinks (Colaprico et al. 2018, PMID: 26704973) and DeepBlueR (Albrecht et al., 2017, PMID: 28334349) were developed to retrieve data from TCGA, CPTAC, GTEx, GEO and IHEC, Blueprint, ENCODE, Roadmap, respectively. Tumor-specific cancer-driver-gene events and downstream impact can be elucidated with MoonlightR by integrating these datasets (Colaprico et al. 2018). TCGAbiolinks and MoolightR have been used successfully in multiple studies for oncogenic
+We will discuss several computational tools that are useful in clarifying gene functions when performing integrative analysis of multi-omics datasets. In order to deal with the challenges of data retrieval and integration, TCGAbiolinks (Colaprico et al. 2018, PMID: 26704973) and DeepBlueR (Albrecht et al., 2017, PMID: 28334349) were developed to retrieve data from TCGA, CPTAC, GTEx, GEO and IHEC, Blueprint, ENCODE, Roadmap, respectively. 
+Tumor-specific cancer-driver-gene events and downstream impact can be elucidated by integrative analyses of these datasets using MoonlightR (Colaprico et al. 2018).
+TCGAbiolinks and MoolightR have been used successfully in multiple studies for oncogenic
 processes identification (Ding et al., 2018, PMID: 29625049), oncogenic clinically actionable driver genes discovery (Bailey et al., 2018, PMID: 29625053), and comprehensive immune landscape characterization (Thorsson et al., 2018, PMID: 29628290)
 
 
@@ -69,10 +72,11 @@ library(dplyr)
 #library(DT)
 ```
 
-## `TCGA Gene Expression` data (IlluminaHiSeq_RNASeqV2)
+## `TCGA Gene Expression` (IlluminaHiSeq_RNASeqV2) and multi -omics data 
 The end user can search TCGA's samples for a specific cancer of origin, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
-DataDir <- "~/Dropbox (Personal)/Umiami/TCGAanalysis/GDCdata/TCGA-BRCA"
+# DataDir is a directory to save your datasets
+DataDir <- "./TCGAanalysis/GDCdata/TCGA-BRCA"
 
 require(TCGAbiolinks)
 
@@ -119,19 +123,25 @@ BRCARnaseqSE <- GDCprepare(query_down,directory = DataDir)
 # TCGAanalyze_Preprocessing perform Array Array Intensity correlation (AAIC). It defines a square symmetric matrix of spearman correlation among samples. According this matrix and boxplot of correlation samples by samples it is possible to find samples with low correlation that can be identified as possible outliers.
 
 dataPrep <- TCGAanalyze_Preprocessing(BRCARnaseqSE,
-                                      cor.cut = 0.6,)
+                                      cor.cut = 0.6)
 
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
-                                      geneInfo = geneInfoHT,
+                                      geneInfo = geneInfo,
                                       method = "gcContent") 
+
+colnames(dataPrep) <- substr(colnames(dataPrep),1,15)
+colnames(dataNorm) <- substr(colnames(dataNorm),1,15)
 
 pdf("TCGA_BRCA_dataPrep_Norm_boxplot.pdf")
 par(mfrow=c(2,1))
-boxplot(dataPrep, outline = FALSE)
+boxplot(dataPrep, outline = FALSE, las = 2)
 
-boxplot(dataNorm, outline = FALSE)
+boxplot(dataNorm, outline = FALSE, las = 2)
 dev.off()
 
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)  
 ```
 
 The result is shown below:
@@ -153,190 +163,18 @@ img <- readPNG("TCGA_BRCA_dataPrep_Norm_boxplot.png")
 grid.raster(img)
 ```
 
-## `TCGA Protein Expression` data (RPPA)
-
-You can easily search TCGA samples, download and prepare a matrix of protein RPPA expression.
-```{r, eval = FALSE}
-require(TCGAbiolinks)
-cancerType <- "BRCA"
-
-query.RPPA <- GDCquery(project = paste0("TCGA-",cancerType), 
-                       legacy = TRUE,
-                       data.category = "Protein expression",
-                       platform = "MDA_RPPA_Core", 
-                       data.type = "Protein expression quantification",
-                       file.type = "expression", 
-                       sample.type = c("Primary solid Tumor"))
-
-samples.RPPA <- query.RPPA$results[[1]]$cases
+To retrieve other datatypes using TCGAbiolinks it is possible to follow the example for gene expression but replacing the parameters as shown in the following table:
 
 
-query.RPPA.down <- GDCquery(project = paste0("TCGA-",cancerType), 
-                            legacy = TRUE,
-                            data.category = "Protein expression",
-                            data.type = "Protein expression quantification",
-                            platform = "MDA_RPPA_Core", 
-                            file.type = "expression", 
-                            sample.type = c("Primary solid Tumor"),
-                            barcode = samples.RPPA)
 
-
-GDCdownload(query.RPPA.down, 
-            directory = PathDir)
-
-data.RPPA <- GDCprepare(query.RPPA.down, 
-                        directory = PathDir)
-
+```{r, eval = TRUE, echo = FALSE,size = 8}
+library(TCGAbiolinks)
+load("./data/TableDataTypes.rda")
+knitr::kable(TableDataTypes, 
+             caption = "Multi -omics data in TCGAbiolinks",
+             row.names = TRUE)
 ```
 
-## `TCGA Copy number variation` (CNV) Affymetrix SNP Array 6.0
-
-You can easily search TCGA samples, download and prepare a matrix of CN segments.
-```{r, eval = FALSE}
-require(TCGAbiolinks)
-
-cancerType <- "BRCA"
-query.cnv <- GDCquery(project = cancerType,
-                      data.category =  "Copy number variation",
-                      legacy = TRUE,
-                      data.type = "Copy number segmentation",
-                      platform = "Affymetrix SNP Array 6.0",
-                      file.type = "nocnv_hg19.seg",
-                      sample.type = c("Primary solid Tumor"))
-
-samples.cnv <- query.cnv$results[[1]]$cases[1:20]
-
-query.cnv.down <- GDCquery(project = cancerType,
-                      data.category =  "Copy number variation",
-                      legacy = TRUE,
-                      platform = "Affymetrix SNP Array 6.0",
-                      data.type = "Copy number segmentation",
-                      file.type = "nocnv_hg19.seg",
-                      sample.type = c("Primary solid Tumor"),
-                      barcode = samples.cnv)
-
-GDCdownload(query.cnv.down,
-            directory = PathDir)
-
-data.cnv <- GDCprepare(query.cnv.down, 
-                        directory = PathDir)
-
-data.cnv <- as.data.frame(data.cnv)
-```
-
-## `TCGA DNA methylation` Illumina Human Methylation 450
-
-You can easily search TCGA samples, download and prepare a matrix of DNA methylation probes.
-```{r, eval = FALSE}
-require(TCGAbiolinks)
-cancerType <- "BRCA"
-query.met <- GDCquery(project = cancerType, 
-                      legacy = TRUE,
-                      data.category = "DNA methylation",
-                      platform = "Illumina Human Methylation 450",
-                      sample.type = c("Primary solid Tumor"))
-
-samples.met <- query.met$results[[1]]$cases[1:20]
-
-query.met.down <- GDCquery(project = cancerType, 
-                      legacy = TRUE,
-                      data.category = "DNA methylation",
-                      platform = "Illumina Human Methylation 450",
-                      sample.type = c("Primary solid Tumor"),
-                      barcode = samples.met)
-
-GDCdownload(query.met.down,
-            directory = PathDir)
-
-data.met <- GDCprepare(query.met.down, 
-                       directory = PathDir)
-
-```
-
-## `TCGA Mutation` Mutation Annotation Format (MAF)
-
-You can easily search TCGA samples, download and prepare a matrix of Mutations.
-```{r, eval = FALSE}
-require(TCGAbiolinks)
-cancerType <- "TCGA-BRCA"
-query.mut <- GDCquery(project = cancerType, 
-                      data.category = "Simple nucleotide variation", 
-                      data.type = "Simple somatic mutation",
-                      access = "open", 
-                      sample.type = c("Primary solid Tumor"),
-                      legacy = TRUE)
-
-# Check maf availables
-query.mut$results[[1]]$file_name
-
-query.mut <- GDCquery(project = cancerType, 
-                      data.category = "Simple nucleotide variation", 
-                      data.type = "Simple somatic mutation",
-                      access = "open", 
-                      sample.type = c("Primary solid Tumor"),
-                      legacy = TRUE,
-                      file.type = query.mut$results[[1]]$file_name[1])
-
-samples.mut <- query.mut$results[[1]]$cases
-
-
-query.mut.down <- GDCquery(project = cancerType, 
-                           data.category = "Simple nucleotide variation", 
-                           data.type = "Simple somatic mutation",
-                           access = "open", 
-                           sample.type = c("Primary solid Tumor"),
-                           legacy = TRUE,
-                           barcode = samples.mut,
-                           file.type = query.mut$results[[1]]$file_name[1])
-
-GDCdownload(query.mut.down,
-            directory = PathDir)
-
-data.mut <- GDCprepare(query.mut.down, 
-                       directory = PathDir)
-
-
-```
-
-
-## `TCGA microRNA Expression` Illumina HiSeq
-
-You can easily search TCGA samples, download and prepare a matrix of microRNA Expression
-```{r, eval = FALSE}
-require(TCGAbiolinks)
-cancerType <- "TCGA-BRCA"
-query.miR <- GDCquery(project = cancerType, 
-                      data.category = "Gene expression",
-                      data.type = "miRNA gene quantification",
-                      platform = "Illumina HiSeq",
-                      file.type = "hg19.mirbase20.mirna.quantification",
-                      legacy = TRUE)
-samples.miR <- query.miR$results[[1]]$cases
-
-query.miR.down <- GDCquery(project = cancerType, 
-                      data.category = "Gene expression",
-                      data.type = "miRNA gene quantification",
-                      platform = "Illumina HiSeq",
-                      file.type = "hg19.mirbase20.mirna.quantification",
-                      legacy = TRUE,
-                      barcode = TNBCsamplesmiRlong)
-
-GDCdownload(query.miR.down,
-            directory = PathDir)
-
-data.miR <- GDCprepare(query.miR.down, 
-                       directory = PathDir)
-
-```
-
-## `TCGA Clinical` Data
-
-You can easily search TCGA samples, download and prepare a matrix of clinical data
-```{r, eval = FALSE}
-require(TCGAbiolinks)
-cancerType <- "BRCA"
-dataClin <- GDCquery_clinic(project = paste0("TCGA-",cancerType),type = "clinical")
-```
 
 ## `GTEx gene expression` data
 The Genotype-Tissue Expression (GTEx) project is an ongoing effort to build a comprehensive public resource to study tissue-specific gene expression and regulation. Samples were collected from 53 non-diseased tissue sites across nearly 1000 individuals, primarily for molecular assays including WGS, WES, and RNA-Seq. [https://gtexportal.org/home/]
@@ -367,9 +205,18 @@ data_gtex_brain_GeneExpr <- assay(data_gtex_brain$gtex_brain,1)
 ```
 
 ## `IHEC gene expression` data
-The International Human Epigenome Consortium (IHEC) is a global consortium with the primary goal of providing free access to high-resolution reference human epigenome maps for normal and disease cell types to the research community. [http://ihec-epigenomes.org/]
-
-The BLUEPRINT consortium has been formed with the aim to further the understanding of how genes are activated or repressed in both healthy and diseased human cells. BLUEPRINT focuses on distinct types of haematopoietic cells from healthy individuals and on their malignant leukaemic counterparts.
+The International Human Epigenome Consortium (IHEC) is a global consortium with the primary goal of providing free access to high-resolution reference human epigenome maps for normal and disease cell types to the research community. [http://ihec-epigenomes.org/] 
+IHEC provides data currently available from the following consortia:
+* AMED-CREST (Japan)
+* Blueprint (Europe)
+* CEEHRC (Canada)
+* DEEP (Germany)
+* ENCODE (USA)
+* GIS (Singapore)
+* KNIH (South Korea)
+* Roadmap (USA)
+ 
+Within IHEC, the BLUEPRINT consortium has been formed with the aim to further the understanding of how genes are activated or repressed in both healthy and diseased human cells. Specifically, BLUEPRINT includes data on distinct types of haematopoietic cells from healthy individuals and their malignant leukaemic counterparts.
 
 You can easily search IHEC BLUEPRINT samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
@@ -458,10 +305,7 @@ save(IHEC_genes_matrix,  IHEC_sample_names, file = "IHEC_BLUEPRINT_geneExpr.Rdat
 ```
 
 ## `GEO gene expression` dataset
-GEO Gene Expression Omnibus (GEO) is the public repository for high throughput data at NCBI. 
-[https://www.ncbi.nlm.nih.gov/geo/]
-Here we show how to retrieve GEOs' samples, download and prepare a matrix of gene expression.
-In particular to retrieve the gene expression matrix from Nazor et al. (2012, PMID: 22560082).
+GEO Gene Expression Omnibus (GEO) is the public repository for high throughput data at NCBI. [https://www.ncbi.nlm.nih.gov/geo/] Here we show how to retrieve GEOs’ samples, download and prepare a matrix of gene expression. In particular to retrieve the gene expression matrix for different cell types from Nazor et al. (2012, PMID: 22560082).
 
 ```{r, eval = FALSE}
 require(MoonlightR)
@@ -469,17 +313,20 @@ require(GEOquery)
 library(devtools)
 install_github("ibsquare/MoonlightR") 
 
+# get gene expression data
 dataNazor <- getDataGEO(GEOobject = "GSE30652",
                         platform =  "GPL6947")
 
 require(SummarizedExperiment)
 GSE30652 <- as.data.frame(exprs(dataNazor))
+
+# summarize gene expression data from multiple probes using means
 GSE30652_non_norm <- cbind(ILMN = rownames(GSE30652),
                            IDmean = rowMeans(GSE30652),
                            GSE30652)
 
 
-
+# get phenotype data
 dataNazor_samples <- pData(dataNazor)
 dataNazor_samples <- as.data.frame(dataNazor_samples)
 dataNazor_samples <- subset(dataNazor_samples,
@@ -516,13 +363,18 @@ save(NazorMatrix,dataNazor_samples, file = "Nazor_GSE30652.Rdata")
 
 # Oncogenic processes and driver genes using MoonlightR
 ## MoonlightR overview
-In order to make light of cancer development, it is crucial to identify the genes involved in the disease mechanisms and moreover understand what functional roles it plays. Common biological processes such as proliferation and apoptosis have been linked to cancer progression. MoonlightR is a new approach to define tumor suppressor genes (TSGs) and oncogenes (OCGs) based on functional enrichment analysis, inference of gene regulatory networks and upstream regulator analysis to score the importance of well-known biological processes with respect to the studied cancer.
-In the MoonlightR pipeline, first, based on expression data we perform functional enrichment analysis, infer gene regulatory networks and upstream regulator analysis to score the importance of well-known biological processes with respect to the studied cancer. We then use these scores to predict two specific roles: genes that act as TSGs and genes that act as OCGs. This methodology not only allows us to identify genes with dual roles (TSG in one cancer type and OCG in another) but also to elucidate the underlying biological processes they are involved with.
+In this section, we illustrate the moonlightR analysis pipeline using the BRCA data we downloaded from previous section. In order to make light of cancer development, it is crucial to identify the genes involved in the disease mechanisms and moreover understand what functional roles it plays. Common biological processes such as proliferation and apoptosis have been linked to cancer progression. MoonlightR is a new approach to define tumor suppressor genes (TSGs) and oncogenes (OCGs) based on functional enrichment analysis, inference of gene regulatory networks and upstream regulator analysis to score the importance of well-known biological processes with respect to the studied cancer. 
+
+In the MoonlightR pipeline, first, based on expression data we perform functional enrichment analysis, infer gene regulatory networks and upstream regulator analysis to score the importance of well-known biological processes with respect to the studied cancer. We then use these scores to predict two specific roles for genes: genes that act as TSGs and genes that act as OCGs. This methodology not only allows us to identify genes with dual roles (TSG in one cancer type and OCG in another) but also to elucidate the underlying biological processes they are involved with.
 
 ## MoonlightR pipeline
-Here we describe two Moonlight approaches: Moonlight-EB (expert based) and Moonlight-ML (machine learning).
-The EB and ML approaches share the following three initial steps (Fig 1b, Methods): (i) Moonlight identifies a set of Differentially Expressed Genes (DEGs) between two conditions, then (ii) the gene expression data is used to infer a Gene Regulatory Network (GRN) with the DEGs as vertices and (iii) using Functional Enrichment Analysis (FEA), Moonlight considers a DEG in a biological system and quantifies the DEG-BP (biological process) association with a Moonlight Z-score. Finally, we input DEGs and their GRN to Upstream Regulatory Analysis (URA), yielding upstream regulators of BPs mediated by the DEG and its targets.
-The second part of the pipeline’s tool provides Pattern Recognition Analysis (PRA) that incorporates two approaches. In the first approach, PRA takes in two objects: (i) URA’s output and (ii) selection of a subset of the BP provided by the end-user. In contrast, if the BPs are not provided, their selection is automated by a ML method (e.g. random forest model) trained on gold standard oncogenes (OCG) and tumor-suppressor genes (TSG) in the second approach. In addition, dynamic recognition analysis (DRA) detects multiple patterns of BPs when different conditions are selected.
+Here we describe two Moonlight approaches: Moonlight-EB (expert based) and Moonlight-ML (machine learning). The EB and ML approaches share the following three initial steps (Fig 1b, Methods): 
+*(i) DPA: Moonlight identifies a set of Differentially Expressed Genes (DEGs) between two conditions;  
+*(ii) GRN: The gene expression data is used to infer a Gene Regulatory Network (GRN) with the DEGs as vertices and 
+*(iii) FEA: using Functional Enrichment Analysis (FEA), Moonlight considers a DEG in a biological system and quantifies the DEG-BP (biological process) association with a Moonlight Z-score. 
+*(iv) URA/PRA:  Finally, we input DEGs and their GRN to Upstream Regulatory Analysis (URA), yielding upstream regulators of BPs mediated by the DEG and its targets. The second part of the pipeline’s tool provides Pattern Recognition Analysis (PRA) that incorporates two approaches. 
+
+In the first approach, PRA takes in two objects: (i) URA’s output and (ii) selection of a subset of the BP provided by the end-user. In contrast, if the BPs are not provided, their selection is automated by a ML method (e.g. random forest model) trained on gold standard oncogenes (OCG) and tumor-suppressor genes (TSG) in the second approach. In addition, dynamic recognition analysis (DRA) detects multiple patterns of BPs when different conditions are selected.
 
 Moonlight’s pipeline is shown below::
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
@@ -541,7 +393,7 @@ grid.raster(img)
 
 
 ## `DPA`: Differential Phenotype Analysis
-Differential phenotype analysis (DPA) is able to identify genes or probes that are significantly different between two phenotypes such as normal vs. tumor, or normal vs. stage I, normal vs. a particular molecular subtype.
+Differential phenotype analysis (DPA) identifies genes or probes that are significantly different between two phenotypes such as normal vs. tumor, or normal vs. stage I, normal vs. a particular molecular subtype.
 For gene expression data, DPA performes a differential expression analysis (DEA) to identify differentially expressed genes (DEGs) using the `TCGAanalyze_DEA` function from \Biocpkg{TCGAbiolinks}.
 For methylation data, DPA is performes a differentially methylated probes analysis (DMP) to identify differentially methylated CpG sites using the `TCGAanalyze_DMR` function from \Biocpkg{TCGAbiolinks}.
 
@@ -549,7 +401,11 @@ For the following example we will use a dataset of breast cancer samples TCGA BR
 
 ```{r, eval = FALSE, message=FALSE, results='hide', warning=FALSE}
 require(MoonlightR)
-dataBRCA <- MoonlightR::dataFilt
+# dataFilt is a gene expression dataset with lowly expressed genes filtered out
+# dataFilt can be generated following the previous section
+# TCGA Gene Expression` (IlluminaHiSeq_RNASeqV2) and multi -omics data
+
+dataBRCA <- data("dataFilt")
 
 dataDEGs <- DPA(dataFilt = dataBRCA,
                 dataType = "Gene expression",
@@ -586,11 +442,11 @@ grid.raster(img)
 
 
 ## `FEA`: Functional Enrichment Analysis
-The user can also perform a functional enrichment analysis using the function `FEA`. 
+The function FEA performs a functional enrichment analysis using Fisher’s exact test, which identifies gene sets that are significantly enriched with differentially expressed genes. The steps of FEA involve (i) evaluating if DEGs are involved in a biologlical process(BP) through an assessment of the overlap between the list of DEGs and genes relevant to this BP determined by literature mining and (ii) detecting the BPs over-represented by DEGs using Fisher Exact Test. 
+In the following, we considered BPs over-represented by genes with  |Moonlight-score| >=1 and FDR <= 0.01. (See Methodology in https://www.biorxiv.org/content/10.1101/265322v1.article-info)
 
-This analysis, using Fisher’s test, allows for the identification of gene sets (with biological functions linked to cancer studies) that are significantly enriched in the regulated genes. The steps of FEA involve (i) evaluating if DEGs are involved in a BP through an assessment of the overlap between the list of DEGs and genes relevant to this BP determined by literature mining and (ii) detecting the BPs mainly enriched by DEGs. A Fisher Exact Test is used to calculate the probability of the BP’s enrichment based on the overlapping of the genes annotated in each BP and the entire list of DEGs. We considered BPs enriched significantly with |Moonlight-score| >=1 and FDR <= 0.01.
-
-
+In each BP we defined a Moonlight Z-score as the ratio between the sum of all predicted effects (according literature mining) for all the gene
+involved in the specific BP and the square-root of the number of all genes. 
 ```{r, eval = TRUE, echo = TRUE, results='hide'}
 require(MoonlightR)
 data(DEGsmatrix)
@@ -602,6 +458,8 @@ dataFEA_filt <- dataFEA_filt[abs(dataFEA_filt$Moonlight.Z.score) > 1,]
 The output can be visualized with a FEA plot (Functional Enrichment Analysis Plot)
 
 The user can plot the result of a functional enrichment analysis using the function `plotFEA`. A negative z-score indicates that the process' activity is decreased.  A positive z-score indicates that the process' activity is increased. 
+Enrichment Analysis showing the BPs enriched significantly with |Moonlight Z-score| >=1 and FDR <= 0.01; increased levels are reported in yellow, decreased in purple, and green shows the -logFDR / 10. A negative Z-score indicates that the process’ activity is decreased while a positive Z-score indicates that the process’ activity is increased. Values in parentheses indicate the number of genes in common between the genes annotated in the biological process and the genes used as input for the functional enrichment.
+
 
 ```{r, eval = FALSE, echo = TRUE, message=FALSE, results='hide', warning=FALSE}
 plotFEA(dataFEA = dataFEA_filt,
@@ -619,14 +477,15 @@ grid.raster(img)
 
 
 ## `GRN`: Gene Regulatory Network
-The user can perform a gene regulatory network analysis using the function `GRN` which infers the network using the \Biocpkg{parmigene} package.
-In this function we calculate the pairwise mutual information between the DEGs and all the genes filtered considering only tumor samples. The pairwise mutual information is then computed using entropy estimates from k-nearest neighbor distances (k = 3) with the R-package \Biocpkg{parmigene} using the function `GRN` from \Biocpkg{MoonlightR}. Afterwards, DEGs’ regulon, representing the genes regulated by a DEG, are defined by filtering out non-significant (p-value 0.05) interactions using a permutation test (nboot = 100, nGenesPerm = 1000) and thus obtaining a set of regulated genes for each DEG.
-
+Next, the GRN function perform a gene regulatory network analysis to identify genes regulated by each DEG. In this function,  considering only tumor samples,  we calculate the pairwise mutual information between the DEGs and genes in dataFilt matrix (see previous section) . Afterwards, DEGs’ regulon, representing the genes regulated by a DEG, are defined by filtering out non-significant (p-value > 0.05) interactions using a permutation test (nboot = 100, nGenesPerm = 1000) and thus obtaining a set of regulated genes for each DEG. 
 
 ```{r, eval = TRUE}
+# this will take a long time with nboot = 100 and nGenesPerm = 1000, so output is saved in dataGRN
+
+# to make this faster, we illustrate with a smaller dataset and 10 permutations, 10 bootstrap samples 
 dataGRN <- GRN(TFs = rownames(DEGsmatrix)[1:100], 
                normCounts = dataFilt,
-	           nGenesPerm = 10,
+               nGenesPerm = 10,
                kNearest = 3,
                nBoot = 10)
 
@@ -669,12 +528,15 @@ dataURA <- URA(dataGRN = dataGRN,
 #ABCA12 0.6064784              3.4152599
 ```
 
-## `PRA`: Pattern Regognition Analysis
-`PRA` allows for the identification of a list of TSGs and OCGs when BPs are provided such as apoptosis and proliferation, otherwise a random Forest based classifier can be used on new data. We define a pattern when a group of genes classified as OCGs share similar BP as apoptosis (DOWN) and proliferation (UP) while genes classified as TSGs share apoptosis (UP) and proliferation (DOWN).
-The input of the `PRA`'s function is the output from `URA`'s function and the list of biological processes(BPs) selected. The output is shown in the following example.
+## `PRA`: Pattern Recognition Analysis
+`PRA`  allows for the identification of a list of TSGs and OCGs when a list of BPs such as apoptosis and proliferation are provided. Alternatively, we can also classify genes as OCGs or TSGs using a Random Forest based classifier trained on validated cancer driver genes (TSGs and OCGs). More specifically, we define a pattern for which the group of genes classified as OCGs share similar BP as apoptosis (DOWN) and proliferation (UP) while genes classified as TSGs share apoptosis (UP) and proliferation (DOWN).
+Once we have a table of gene scores for each BP from URA, we can incorporate the prior biological information to filter out genes with discordant biological effects. For example, it is known that apoptosis and proliferation of cells are opposite biological effects in tumor growth, so the A2M gene (with positive scores in both BPs) should be excluded.
+Pattern Recognition Analysis (PRA) combines information from the BPs with the output from URA, as shown in the next example:
 
+ The input of the PRA’s function is the output from URA’s function and the list of biological processes(BPs) selected. The output is shown in the following example.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
+require(MoonlightR)
 data(dataURA)
 dataDual <- PRA(dataURA = dataURA,
                           BPname = c("apoptosis","proliferation of cells"),
@@ -688,17 +550,29 @@ dataDual <- PRA(dataURA = dataURA,
 #    ABCA3     ABCG1     ABCG2     ABHD6     ABTB1     ACADL      ACAN      ACE2      ACP5      ACP6 
 #3.3825395 1.1088252 3.3062860 1.6521305 2.7699272 2.8953050 1.6175689 1.1016235 1.4461591 1.7583342 
 
+# The scores are computed as average of absolute values from scores of each BP.  
+
 # The user can plot the result of a Upstream regulator analysis using the function `plotURA`. 
 TSGs_genes <- names(dataDual$TSG)
 OCGs_genes <- names(dataDual$OCG)
 plotURA(dataURA = dataURA[c(TSGs_genes, OCGs_genes),])
 
-
 ```
 
 The figure generated by the above code is shown below.
 Heatmap showing Moonlight Z-score for upstream regulators for breast cancer. Row colors indicate red increasing and blue decreasing Moonlight Z-score. 
-OCGs share similar BP as apoptosis (DOWN) and proliferation (UP) while genes classified as TSGs share apoptosis (UP) and proliferation (DOWN).
+OCGs such as (ABCA3, ABCG1, ABCG2) share similar BP as apoptosis (DOWN) and proliferation (UP) while genes classified as TSGs (ACN9, ADCK5, AFAP1L1) share apoptosis (UP) and proliferation (DOWN).
+
+The table to show the result from PRA and URA is shown below:
+
+```{r, eval = TRUE, echo = FALSE,size = 8}
+library(MoonlightR)
+dataTSG_OCG <- dataURA[c(names(dataDual$TSG[1:3]),names(dataDual$OCG[1:3])),]
+
+knitr::kable(dataTSG_OCG, digits = 2, 
+             caption = "Example of a dataURA output with TSGs and OCGs patterns",
+             row.names = TRUE)
+```
 
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
@@ -707,17 +581,9 @@ grid.raster(img)
 ```
 
 ## Moonlight PanCancer Study (18 tumor types)
-Characterize intertumoral (between tumors) genomic epigenomic and
-transcriptomic heterogeneity in cancer tissue by identifying dual role genes.
-In this case study, we used the expression levels of genes in all the samples obtained from
-TCGA - GDC with IlluminaHiSeq RNASeqV2 in 18 normal tissues and 18 cancer tissues according to the TCGA criteria.We applied the complete Moonlight pipeline (FEA-URA-PRA) to extract those genes that were significantly increasing or decreasing biological processes such as proliferation of cells and apoptosis.
-Figure showed the results of the moonlight pipeline that can be visualized
-with a circos plot using the function plotCircos from MoonlightR.
-For further examples see the MoonlightR's vignette
-
+The goal of this study was to characterize intertumoral (between tumors) genomic epigenomic and transcriptomic heterogeneity in cancer tissue by identifying dual role genes. More specifically, we used the expression levels of genes in all the samples obtained from TCGA - GDC with IlluminaHiSeq RNASeqV2 in 18 normal tissues and 18 cancer tissues according to the TCGA criteria.We applied the complete Moonlight pipeline (FEA-URA-PRA) to extract those genes that were significantly increasing or decreasing biological processes such as proliferation of cells and apoptosis. The figure below shows the results of the moonlight pipeline that can be visualized with a circos plot, using the function `plotCircos` from \Biocpkg{MoonlightR}. For further examples see the \Biocpkg{MoonlightR} ’s vignette
 http://bioconductor.org/packages/release/bioc/html/MoonlightR.html
-
-The figure mentioned above is shown below:
+The figure mentioned above is shown below: 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 img <- readPNG("Moonlight_PanCancer18_circos.png")
 grid.raster(img)
@@ -725,10 +591,7 @@ grid.raster(img)
 
 
 # Immune subtypes from Thorsson et al. (2018, PMID: 29628290)
-Thorsson et al. performed an extensive immunogenomic analysis of more than 10,000 tumors comprising 33 diverse cancer types by utilizing data compiled by TCGA. Across cancer types, we identified six immune subtypes—wound healing, IFN-\gamma dominant, inflammatory, lymphocyte depleted, immunologically quiet, and TGF-\beta dominant—characterized by differences in macrophage or lymphocyte signatures, Th1:Th2 cell ratio, extent of intratumoral heterogeneity, aneuploidy, extent of neoantigen load, overall cell proliferation, expression of immunomodulatory genes, and prognosis. 
-
-In this section we illustrate the Immune subtypes for TCGA and GEO tumor samples. Figure1C is from Thorsson et al. (2018, PMID: 29628290), which summarizes features of six different immune subtypes.
-
+Thorsson et al. performed an extensive immunogenomic analysis of more than 10,000 tumors comprising 33 diverse cancer types by utilizing data compiled by TCGA. In this section we illustrate identifying Immune subtypes for TCGA and GEO tumor samples. Figure1C is from Thorsson et al. (2018, PMID: 29628290), which summarizes features of six different immune subtypes.
 
 ```{r, fig.width=10, echo=FALSE, fig.align="center"}
 library(png)
@@ -737,9 +600,10 @@ img <- readPNG("ImmuneSubtypes_workflow.png")
 grid.raster(img)
 ```
 
+Across cancer types, we previously identified six immune subtypes—wound healing, IFN-\gamma dominant, inflammatory, lymphocyte depleted, immunologically quiet, and TGF-\beta dominant, which are characterized by differences in macrophage or lymphocyte signatures, Th1:Th2 cell ratio, extent of intratumoral heterogeneity, aneuploidy, extent of neoantigen load, overall cell proliferation, expression of immunomodulatory genes, and prognosis.
 
 ## Survival analysis of TCGA KIRC samples with Immune Subtypes
-In the following example we firstly will retrieve the TCGA Immune Subtypes for KIRC (Kidney Renal Clear Cell Carcinoma) from the Table S1 from Thorsson et al. (2018, PMID: 29628290), secondly we will run a Kaplan-Meier Overall Survival Analysis breaking by Immune Subtypes.
+In the following example we first retrieve the TCGA Immune Subtypes for KIRC (Kidney Renal Clear Cell Carcinoma) from Table S1 in Thorsson et al. (2018, PMID: 29628290), next we will run a Kaplan-Meier Overall Survival Analysis for these different Immune Subtypes.
 
 ```{r, eval = FALSE}
 
@@ -750,6 +614,7 @@ X1_s2_0_S1074761318301213_mmc2 <- as.data.frame(X1_s2_0_S1074761318301213_mmc2)
 
 CancerType <- c("KIRC")
 
+# a table of subtype info for each TCGA's sample
 ImmuneSubtypes <- as.data.frame(X1_s2_0_S1074761318301213_mmc2)
 
 ImmuneSubtypes <- ImmuneSubtypes[ImmuneSubtypes$`TCGA Study` %in% CancerType,]
@@ -792,6 +657,7 @@ grid.raster(img)
 
 
 ## Immune Subtypes for GEO samples (KIRC example) using data from (Jones et al., 2005  PMID: 16115910)
+We illustrate how to predict different immune subtypes for different samples.  
 
 ```{r, eval = FALSE}
 
@@ -858,10 +724,9 @@ img <- readPNG("stemness_methodology.png")
 grid.raster(img)
 ```
 
-Firstly, we defined a stemness signatures to quantify stemness using publicly available molecular profiles from normal cell types that exhibit various degrees of stemness. More specifically, we derived stemness signatures using an innovative one-class logistic regression (OCLR) machine-learning algorithm (Sokolov et al., 2016, PMID: 26776204) trained on stem cell (ESC, embryonic stemcell; iPSC, induced pluripotent stem cell) classes from NHLBI Progenitor Cell Biology Consortium (PCBC) dataset Salomonis et al. (2018, PMID: 27293150). In this way we obtained the stemness signature contained in the vector PCBC_stemSig in the \Biocpkg{TCGAbiolinks package}, where for each gene we have a model weight, output from the OCLR's algorithm.
+First, we defined a stemness signatures to quantify stemness using publicly available molecular profiles from normal cell types that exhibit various degrees of stemness. More specifically, we derived stemness signatures using an innovative one-class logistic regression (OCLR) machine-learning algorithm (Sokolov et al., 2016, PMID: 26776204) trained on stem cell (ESC, embryonic stemcell; iPSC, induced pluripotent stem cell) classes from NHLBI Progenitor Cell Biology Consortium (PCBC) dataset (Salomonis et al. 2018, PMID: 27293150). In this way we obtained the stemness signature contained in the vector `PCBC_stemSig` in the \Biocpkg{TCGAbiolinks package}, where for each gene we have an estimted weight, based on output from the OCLR’s algorithm.
 
-Secondly, once the signature is obtained, it can be applied to score new samples. For RNA expression data, we computed Spearman correlations between the model’s weight vector and the new sample’s expression profile.
-Secondly, we obtained the stemness indices, for gene expression(mRNAsi) mRNAStemness Index , correlating the genes from each sample to the model weights in PCBC_stemSig ,and the scoring from 0 to 1. Where 1 is more stemness , less differentiate and 0 is less stemness but more differentiate.
+Next, once the signature is obtained, it can be applied to score new samples. For RNA expression data, we computed Spearman correlations between the model’s weight vector PCBC_stemSig and the new sample’s expression profile. These are the stemness indices for gene expression(mRNAsi) , with scores ranging from 0 to 1, where 1 corresponds to more stemness, less differentiated and 0 corresponds to less stemness but more differentiated.
 
 Stemness Highlights:
 
@@ -1152,7 +1017,7 @@ sampleCurCancer <- colnames(dataFilt)
 sampleCurCancer <- sampleCurCancer[substr(sampleCurCancer,1,12) %in% dataSubt_curCancer$pan.samplesID]
 
 dataFilt_curCancer <- dataFilt[,sampleCurCancer]
-load("~/Dropbox (Personal)/Umiami/Github/TCGAbiolinks/data/PCBC_stemSig.rda")
+load("./data/PCBC_stemSig.rda")
 
 TCGA_mRNA_StemScoreTable <- TCGAanalyze_Stemness(stemSig = PCBC_stemSig,
                                                  dataGE = dataFilt_curCancer)
