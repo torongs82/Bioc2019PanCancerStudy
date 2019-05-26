@@ -1,5 +1,6 @@
 ^Bioc2019PanCancerStudy\.Rproj$
 ^\.Rproj\.user$
 ^inst/extdata/*$
+^\.git\*$
 ^vignettes/rsconnect/*$
 ^Bioc2019PanCancerStudy/.git/objects/pack/$

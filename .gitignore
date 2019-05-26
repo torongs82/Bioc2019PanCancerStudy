@@ -2,6 +2,7 @@ inst/doc
 .Rproj.user
 .Rhistory
 .RData
+.git
 .Ruserdata
 *.Rproj
 inst/extdata/*
