@@ -72,21 +72,22 @@ We will illustrate retrieval of different types of –omics datasets including: 
 ## `TCGA Gene Expression` (IlluminaHiSeq_RNASeqV2) and multi -omics data 
 The end user can search TCGA's samples for a specific cancer of origin, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
-# DataDir is a directory to save your datasets
-DataDir <- "TCGAanalysis"
 
-require(TCGAbiolinks)
+library(TCGAbiolinks)
 
 cancerType <- "BRCA"
 
 # Query platform Illumina HiSeq with a list of barcode 
-query <- GDCquery(project = paste0("TCGA-",cancerType),
-                  data.category = "Gene expression",
-                  data.type = "Gene expression quantification",
-                  experimental.strategy = "RNA-Seq",
-                  platform = "Illumina HiSeq",
-                  file.type = "results",
-                  legacy = TRUE)
+query <- GDCquery(
+  project = paste0("TCGA-",cancerType),
+  data.category = "Gene expression",
+  data.type = "Gene expression quantification",
+  experimental.strategy = "RNA-Seq",
+  platform = "Illumina HiSeq",
+  file.type = "results",
+  legacy = TRUE
+)
+# 38 seconds on GO's machine
 
 # We select 10 tumor and 10 normal samples
 Sample_sel <- query$results[[1]]$cases
@@ -100,47 +101,61 @@ Sample_sel_NT <- TCGAquery_SampleTypes(barcode = Sample_sel,typesample = "NT")
 Sample_sel_short <- c(Sample_sel_TP[1:10],Sample_sel_NT[1:10])
 
 # we need to create a new query with the selected barcodes
-query_down <- GDCquery(project = paste0("TCGA-",cancerType),
-                  data.category = "Gene expression",
-                  data.type = "Gene expression quantification",
-                  experimental.strategy = "RNA-Seq",
-                  platform = "Illumina HiSeq",
-                  file.type = "results",
-                  barcode = Sample_sel_short,
-                  legacy = TRUE)
+system.time(
+query_down <- GDCquery(
+  project = paste0("TCGA-",cancerType),
+  data.category = "Gene expression",
+  data.type = "Gene expression quantification",
+  experimental.strategy = "RNA-Seq",
+  platform = "Illumina HiSeq",
+  file.type = "results",
+  barcode = Sample_sel_short,
+  legacy = TRUE
+)
+# 44.30 seconds on GO's machine
+)
 ```
 
 Now that we have defined the query, we can download the respective data. Makse sure you have a directory to save this data defined beforehand. The data will be downloaded to the folder `TCGA-BRCA` (the first value of `query_down$project`) as a subdirectory of the data directory specified. In addition to downloading the data, this function will write a file called "MANIFEST.txt" to your current *working directory*, not to the directory you specify.
-```{r}
+```{r, eval = FALSE}
+# DataDir is a directory to save your datasets
+DataDir <- "../inst/extdata/TCGAanalysis/GDCdata"
+
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
-GDCdownload(query_down,directory = DataDir)
+GDCdownload(query_down, directory = DataDir)
 
 # Prepare expression matrix with geneID in the rows and samples (barcode) in the columns
 # rsem.genes.results as values
-BRCARnaseqSE <- GDCprepare(query_down,directory = DataDir)
-# 
-# TCGAanalyze_Preprocessing perform Array Array Intensity correlation (AAIC). It defines a square symmetric matrix of spearman correlation among samples. According this matrix and boxplot of correlation samples by samples it is possible to find samples with low correlation that can be identified as possible outliers.
+BRCARnaseqSE <- GDCprepare(query_down, directory = DataDir)
+```
 
-dataPrep <- TCGAanalyze_Preprocessing(BRCARnaseqSE,
-                                      cor.cut = 0.6)
 
-dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
-                                      geneInfo = geneInfo,
-                                      method = "gcContent") 
+Next, the `TCGAanalyze_Preprocessing()` function performs Array-Array Intensity correlation (AAIC). It defines a square symmetric matrix of Spearman correlations among samples. According this matrix and boxplot of correlation samples by samples it is possible to find samples with low correlation that can be identified as possible outliers. The `cor.cut` controls ... **ANTONIO EDIT HERE**.
+```{r }
+dataPrep <- TCGAanalyze_Preprocessing(
+  BRCARnaseqSE, cor.cut = 0.6
+)
 
-colnames(dataPrep) <- substr(colnames(dataPrep),1,15)
-colnames(dataNorm) <- substr(colnames(dataNorm),1,15)
+dataNorm <- TCGAanalyze_Normalization(
+  tabDF = dataPrep,
+  geneInfo = geneInfo,
+  method = "gcContent"
+) 
+
+colnames(dataPrep) <- substr(colnames(dataPrep), 1, 15)
+colnames(dataNorm) <- substr(colnames(dataNorm), 1, 15)
 
 pdf("TCGA_BRCA_dataPrep_Norm_boxplot.pdf")
-par(mfrow=c(2,1))
+par(mfrow = c(2, 1))
 boxplot(dataPrep, outline = FALSE, las = 2)
-
 boxplot(dataNorm, outline = FALSE, las = 2)
 dev.off()
 
-dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
-                                  method = "quantile", 
-                                  qnt.cut =  0.25)  
+dataFilt <- TCGAanalyze_Filtering(
+  tabDF = dataNorm,
+  method = "quantile", 
+  qnt.cut =  0.25
+)  
 ```
 
 The result is shown below:
