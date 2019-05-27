@@ -474,7 +474,9 @@ involved in the specific BP and the square-root of the number of all genes.
 require(MoonlightR)
 data(DEGsmatrix)
 dataFEA <- FEA(DEGsmatrix = DEGsmatrix)
+dataFEA <- cbind(dataFEA, FDR = p.adjust(dataFEA$p.Value,method = "fdr") )
 dataFEA_filt <- dataFEA[dataFEA$FDR < 0.01,]
+colnames(dataFEA_filt)[3] <- "Moonlight.Z.score"
 dataFEA_filt <- dataFEA_filt[abs(dataFEA_filt$Moonlight.Z.score) > 1,]
 ```
 
