@@ -69,12 +69,6 @@ Using TCGAbiolinks, you can easily query, download, and prepare multi-omics data
 
 We will illustrate retrieval of different types of –omics datasets including: 1. Gene expression 2. Copy number 3. Protein expression (RRPA) 4. Methylation 5. Clinical data 6. microRNA expression 7. Mutation 8. Chromatin Accessibility
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
-library(SummarizedExperiment)
-library(dplyr)
-#library(DT)
-```
-
 ## `TCGA Gene Expression` (IlluminaHiSeq_RNASeqV2) and multi -omics data 
 The end user can search TCGA's samples for a specific cancer of origin, download and prepare a matrix of gene expression.
 ```{r, eval = TRUE}
