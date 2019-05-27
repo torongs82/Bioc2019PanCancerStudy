@@ -72,12 +72,9 @@ We will illustrate retrieval of different types of –omics datasets including: 
 ## `TCGA Gene Expression` (IlluminaHiSeq_RNASeqV2) and multi -omics data 
 The end user can search TCGA's samples for a specific cancer of origin, download and prepare a matrix of gene expression.
 <<<<<<< HEAD
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 # DataDir is a directory to save your datasets
 DataDir <- "TCGAanalysis"
-=======
-```{r, eval = FALSE}
->>>>>>> c5024a69139733bd9921687531f6c53fcd7803b1
 
 library(TCGAbiolinks)
 
