@@ -108,8 +108,10 @@ query_down <- GDCquery(project = paste0("TCGA-",cancerType),
                   file.type = "results",
                   barcode = Sample_sel_short,
                   legacy = TRUE)
+```
 
-
+Now that we have defined the query, we can download the respective data. Makse sure you have a directory to save this data defined beforehand. The data will be downloaded to the folder `TCGA-BRCA` (the first value of `query_down$project`) as a subdirectory of the data directory specified. In addition to downloading the data, this function will write a file called "MANIFEST.txt" to your current *working directory*, not to the directory you specify.
+```{r}
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
 GDCdownload(query_down,directory = DataDir)
 

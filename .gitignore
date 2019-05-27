@@ -6,3 +6,4 @@ inst/doc
 .Ruserdata
 *.Rproj
 inst/extdata/*
+inst/extdata/TCGAanalysis/
