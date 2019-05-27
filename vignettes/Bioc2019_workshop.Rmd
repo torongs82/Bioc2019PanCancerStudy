@@ -77,9 +77,9 @@ library(dplyr)
 
 ## `TCGA Gene Expression` (IlluminaHiSeq_RNASeqV2) and multi -omics data 
 The end user can search TCGA's samples for a specific cancer of origin, download and prepare a matrix of gene expression.
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 # DataDir is a directory to save your datasets
-DataDir <- "./TCGAanalysis/GDCdata/TCGA-BRCA"
+DataDir <- "TCGAanalysis"
 
 require(TCGAbiolinks)
 
