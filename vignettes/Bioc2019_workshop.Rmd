@@ -26,7 +26,6 @@ knitr::opts_chunk$set(
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 library(knitr)
-#library(papeR)
 ```
 
 
@@ -181,8 +180,10 @@ The result from TCGAanalyze_Preprocessing and TCGAanalyze_Normalization is shown
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
 library(png)
 library(grid)
-img <- readPNG("TCGA_BRCA_dataPrep_Norm_boxplot.png")
-grid.raster(img)
+
+grid.raster(
+  readPNG("figs/TCGA_BRCA_dataPrep_Norm_boxplot.png")
+)
 ```
 
 To retrieve other datatypes using TCGAbiolinks it is possible to follow the example for gene expression but replacing the parameters as shown in the following table:
@@ -204,10 +205,10 @@ To retrieve other datatypes using TCGAbiolinks it is possible to follow the exam
 The Genotype-Tissue Expression (GTEx) project is an ongoing effort to build a comprehensive public resource to study tissue-specific gene expression and regulation. Samples were collected from 53 non-diseased tissue sites across nearly 1000 individuals, primarily for molecular assays including WGS, WES, and RNA-Seq. [https://gtexportal.org/home/]
 You can easily search GTEx samples, download and prepare a matrix of gene expression [RNA-Seq].
 ```{r, eval = FALSE}
-#Genotype-Tissue Expression (GTEx) project, which is another large-scale repository cataloging gene expression from healthy individuals.
+# Genotype-Tissue Expression (GTEx) project, which is another large-scale
+#   repository cataloging gene expression from healthy individuals.
 
 # In the following example we will retrieve data from brain's tissue.
-require(TCGAbiolinks)
 
 data_gtex_brain <- TCGAquery_recount2("gtex", tissue = "brain")
 
@@ -242,11 +243,12 @@ IHEC provides data currently available from the following consortia:
  
 Within IHEC, the BLUEPRINT consortium has been formed with the aim to further the understanding of how genes are activated or repressed in both healthy and diseased human cells. Specifically, BLUEPRINT includes data on distinct types of haematopoietic cells from healthy individuals and their malignant leukaemic counterparts.
 
+```{r pack_load_DeepBlue}
+library(DeepBlueR)
+```
+
 You can easily search IHEC BLUEPRINT samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
-require(DeepBlueR)
-require(dplyr)
-
 # List all IHEC samples 
 IHEC_samples <- deepblue_list_samples()
 
@@ -332,8 +334,8 @@ save(IHEC_genes_matrix,  IHEC_sample_names, file = "IHEC_BLUEPRINT_geneExpr.Rdat
 GEO Gene Expression Omnibus (GEO) is the public repository for high throughput data at NCBI. [https://www.ncbi.nlm.nih.gov/geo/] Here we show how to retrieve GEOs’ samples, download and prepare a matrix of gene expression. In particular to retrieve the gene expression matrix for different cell types from Nazor et al. (2012, PMID: 22560082).
 
 ```{r, eval = FALSE}
-require(MoonlightR)
-require(GEOquery)
+library(MoonlightR)
+library(GEOquery)
 library(devtools)
 
 # get gene expression data
@@ -405,13 +407,15 @@ In the first approach, PRA takes in two objects: (i) URA’s output and (ii) sel
 
 Moonlight’s pipeline is shown below::
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-img <- readPNG("Moonlight_pipeline1.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/Moonlight_pipeline1.png")
+)
 ```
 
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-img <- readPNG("Moonlight_pipeline2.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/Moonlight_pipeline2.png")
+)
 ```
 
 
@@ -423,7 +427,6 @@ For methylation data, DPA is performes a differentially methylated probes analys
 For the following example we will use a dataset of breast cancer samples TCGA BRCA (10 TP tumor samples and 10 NT normal samples) previously downloaded and included in \Biocpkg{MoonlightR} package.
 
 ```{r, eval = FALSE, message=FALSE, results='hide', warning=FALSE}
-require(MoonlightR)
 # dataFilt is a gene expression dataset with lowly expressed genes filtered out
 # dataFilt can be generated following the previous section
 # TCGA Gene Expression` (IlluminaHiSeq_RNASeqV2) and multi -omics data
@@ -439,28 +442,27 @@ dataDEGs <- DPA(dataFilt = dataBRCA,
 We can visualize those differentially expressed genes (DEGs) with a volcano plot using the `TCGAVisualize_volcano` function.
 
 ```{r, eval = FALSE, echo = TRUE}
-library(TCGAbiolinks)
-require(MoonlightR)
-
-TCGAVisualize_volcano(dataDEGs$logFC, dataDEGs$FDR,
-                      filename = "DEGs_volcano.png",
-                      x.cut = 1,
-                      y.cut = 0.01,
-                      names = rownames(dataDEGs),
-                      color = c("black","red","dodgerblue3"),
-                      names.size = 2,
-                      show.names = "highlighted",
-                      highlight = c("SPINK4","INSL4"),
-                      xlab = " Gene expression fold change (Log2)",
-                      legend = "State",
-                      title = "Volcano plot (Normal NT vs Tumor TP)",
-                      width = 10)
+TCGAVisualize_volcano(
+  dataDEGs$logFC, dataDEGs$FDR,
+  filename = "DEGs_volcano.png",
+  x.cut = 1, y.cut = 0.01,
+  names = rownames(dataDEGs),
+  color = c("black","red","dodgerblue3"),
+  names.size = 2,
+  show.names = "highlighted",
+  highlight = c("SPINK4","INSL4"),
+  xlab = " Gene expression fold change (Log2)",
+  legend = "State",
+  title = "Volcano plot (Normal NT vs Tumor TP)",
+  width = 10
+)
 ```
 
 The figure generated by the code above is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-img <- readPNG("DEGs_volcano.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/DEGs_volcano.png")
+)
 ```
 
 
@@ -495,8 +497,9 @@ plotFEA(
 
 The figure generated by the above code is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-img <- readPNG("FEAplot.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/FEAplot.png")
+)
 ```
 
 
@@ -579,8 +582,9 @@ plotURA(dataURA = dataURA[c(TSGs_genes, OCGs_genes), ])
 
 The figure generated by the above code is shown below. This heatmap shows Moonlight Z-score for upstream regulators in BRCA. Row colors: red indicates increasing and blue decreasing Moonlight Z-scores. OCGs, such as ABCA3, ABCG1, and ABCG2, share similar BP as apoptosis (DOWN) and proliferation (UP); Genes classified as TSGs (ACN9, ADCK5, AFAP1L1) share apoptosis (UP) and proliferation (DOWN).
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-img <- readPNG("URAplot.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/URAplot.png")
+)
 ```
 
 The table to show the result from PRA and URA is shown below:
@@ -599,8 +603,9 @@ The goal of this study was to characterize intertumoral (between tumors) genomic
 http://bioconductor.org/packages/release/bioc/html/MoonlightR.html
 The figure mentioned above is shown below: 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-img <- readPNG("Moonlight_PanCancer18_circos.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/Moonlight_PanCancer18_circos.png")
+)
 ```
 
 
@@ -608,8 +613,9 @@ grid.raster(img)
 Thorsson et al. performed an extensive immunogenomic analysis of more than 10,000 tumors comprising 33 diverse cancer types by utilizing data compiled by TCGA. In this section we illustrate identifying Immune subtypes for TCGA and GEO tumor samples. Figure1C is from Thorsson et al. (2018, PMID: 29628290), which summarizes features of six different immune subtypes.
 
 ```{r, fig.width=10, echo=FALSE, fig.align="center"}
-img <- readPNG("ImmuneSubtypes_workflow.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/ImmuneSubtypes_workflow.png")
+)
 ```
 
 Across cancer types, we previously identified six immune subtypes—wound healing, IFN-\gamma dominant, inflammatory, lymphocyte depleted, immunologically quiet, and TGF-\beta dominant, which are characterized by differences in macrophage or lymphocyte signatures, Th1:Th2 cell ratio, extent of intratumoral heterogeneity, aneuploidy, extent of neoantigen load, overall cell proliferation, expression of immunomodulatory genes, and prognosis.
@@ -636,33 +642,39 @@ ImmuneSubtypes <- ImmuneSubtypes[ImmuneSubtypes$`Immune Subtype`!="NA",]
 
 dataClin_KIRC <- GDCquery_clinic(project = "TCGA-KIRC",type = "clinical")
 
-dataClin_merged <- merge(x = dataClin_KIRC,
-                         y = ImmuneSubtypes,
-                         by.x = "submitter_id",
-                         by.y = "TCGA Participant Barcode")
+dataClin_merged <- merge(
+  x = dataClin_KIRC,
+  y = ImmuneSubtypes,
+  by.x = "submitter_id",
+  by.y = "TCGA Participant Barcode"
+)
 
 
-p <- TCGAanalyze_survival(dataClin_merged,
-                          clusterCol = "Immune Subtype",
-                          conf.int = FALSE,
-                          main = "TCGA KIRC Immune Subtypes",
-                          height = 10,
-                          width=10,
-                          risk.table = TRUE,
-                          filename = NULL)
+p <- TCGAanalyze_survival(
+  dataClin_merged,
+  clusterCol = "Immune Subtype",
+  conf.int = FALSE,
+  main = "TCGA KIRC Immune Subtypes",
+  height = 10, width = 10,
+  risk.table = TRUE,
+  filename = NULL
+)
 
-p <- p$plot
+p <- p$plot +
+  theme(legend.position = "right")
 
-p <- p  + theme(legend.position = "right")
-
-ggsave(p , filename = "TCGA_KIRC_ImmuneSubtypes_survival.png",width = 10,height = 6)
+ggsave(p,
+  filename = "figs/TCGA_KIRC_ImmuneSubtypes_survival.png",
+  width = 10, height = 6
+)
 
 ```
 
 The result from the Immune subtypes -survival association for TCGA KIRC samples is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-img <- readPNG("TCGA_KIRC_ImmuneSubtypes_survival.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/TCGA_KIRC_ImmuneSubtypes_survival.png")
+)
 ```
 
 
@@ -673,11 +685,11 @@ We illustrate how to predict different immune subtypes for different samples.
 
 ```{r, eval = FALSE}
 
-require(MoonlightR)
+dataGEO_KIRC<- getDataGEO(
+  GEOobject = "GSE15641",
+  platform =  "GPL96"
+)
 
-dataGEO_KIRC<- getDataGEO(GEOobject = "GSE15641",
-                        platform =  "GPL96")
-require(SummarizedExperiment)
 
 GSE15641 <- as.data.frame(exprs(dataGEO_KIRC))
 GSE15641_non_norm <- cbind(ILMN = rownames(GSE15641),
@@ -730,8 +742,9 @@ The Overall methodology for Development and Validation of the Stemness Indices f
 
 
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-img <- readPNG("stemness_methodology.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/stemness_methodology.png")
+)
 ```
 
 First, we defined a stemness signatures to quantify stemness using publicly available molecular profiles from normal cell types that exhibit various degrees of stemness. More specifically, we derived stemness signatures using an innovative one-class logistic regression (OCLR) machine-learning algorithm (Sokolov et al., 2016, PMID: 26776204) trained on stem cell (ESC, embryonic stemcell; iPSC, induced pluripotent stem cell) classes from NHLBI Progenitor Cell Biology Consortium (PCBC) dataset (Salomonis et al. 2018, PMID: 27293150). In this way we obtained the stemness signature contained in the vector `PCBC_stemSig` in the \Biocpkg{TCGAbiolinks package}, where for each gene we have an estimted weight, based on output from the OCLR’s algorithm.
@@ -749,11 +762,12 @@ In the following subsection we will illustrate the methodology used in Malta et 
 
 ## Validation of Stemness signature in external dataset [GEO] Nazor et al. (2012, PMID: 22560082)
 ```{r, eval = FALSE}
-# Firstly we have previously prepared the Gene Expression matrix (genes in rows , samples in columns) # see previous section or download from the following github link
-# "https://github.com/torongs82/Data/blob/master/GEO/Nazor_GSE30652.Rdata"
+# Firstly we have previously prepared the Gene Expression matrix (genes in rows,
+#   samples in columns). See previous section or download from the following
+#   GitHub link:
+# https://github.com/torongs82/Data/blob/master/GEO/Nazor_GSE30652.Rdata
               
 load("./Nazor_GSE30652.Rdata")
-require(TCGAbiolinks)
 TCGA_mRNA_StemScoreTable <- TCGAanalyze_Stemness(stemSig = PCBC_stemSig,
                                           dataGE = NazorMatrix)
 
@@ -776,6 +790,7 @@ tab_mRNASi_merged[tab_mRNASi_merged$CellType %in% "Somatic.Primary","CellType"] 
 tab_mRNASi_merged[tab_mRNASi_merged$CellType %in% "Somatic.Tissue","CellType"] <- "Tissue"
 
 tab_mRNASi_merged <- tab_mRNASi_merged[order(tab_mRNASi_merged$mRNASi, decreasing = FALSE),]
+
 library(forcats)
 p <- ggplot(data=tab_mRNASi_merged, aes(x=Sample, y=mRNASi, fill = CellType)) +
     geom_bar(stat="identity")+
@@ -795,7 +810,11 @@ p <- ggplot(data=tab_mRNASi_merged, aes(x=Sample, y=mRNASi, fill = CellType)) +
 p <- p + theme(legend.position="bottom")
 
 p <- p + aes(x = fct_inorder(Sample))
-ggsave(p, file = "Validation_mRNASi_Nazor.png", width = 6,height = 6)
+
+ggsave(p,
+  file = "figs/Validation_mRNASi_Nazor.png",
+  width = 6, height = 6
+)
 
 
 ```
@@ -805,8 +824,9 @@ The result from TCGAanalyze_Stemness validation in Nazor's Dataset is shown belo
 Embryonic stem cell (ES) in red and Induced pluripotent stem cell (IPS) in pink showed higher stemness score compared to other more mature classes such as Primary in orange and Tissue in darkgreen.
 
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-img <- readPNG("Validation_mRNASi_Nazor.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/Validation_mRNASi_Nazor.png")
+)
 ```
 
 
@@ -818,9 +838,8 @@ grid.raster(img)
 
 load("./IHEC_BLUEPRINT_geneExpr.Rdata")
 
-require(TCGAbiolinks)
-require(stringr)
-require("biomaRt")
+library(stringr)
+library(biomaRt)
 
 IHECMatrix <- IHEC_genes_matrix
 
@@ -837,7 +856,6 @@ IHEC_annot_common <- IHEC_annot[IHEC_annot$X1 %in% colnames(IHECMatrix),]
 
 # mapping Ensembl IDs to gene Symbol
 
-require(TCGAbiolinks)
 library(clusterProfiler)
 library(org.Hs.eg.db)
 gene.df <- bitr(ensemblsIDS, fromType = "ENSEMBL",
@@ -876,8 +894,7 @@ tab_mRNASi_merged <- tab_mRNASi_merged_filt
 
 
 tab_mRNASi_merged <- tab_mRNASi_merged[order(tab_mRNASi_merged$mRNASi, decreasing = FALSE),]
-require(ggplot2)
-library(forcats)
+
 p <- ggplot(data=tab_mRNASi_merged, aes(x=Sample, y=mRNASi, fill = CellType)) +
     geom_bar(stat="identity")+
     scale_colour_gradient2()+
@@ -892,7 +909,11 @@ p <- p + theme(legend.position="right")
 
 p <- p + aes(x = fct_inorder(Sample))
 p <- p + theme(text = element_text(size=14))
-ggsave(p, file = "Validation_mRNASi_IHEC.png", width = 12,height = 6)
+
+ggsave(p,
+  file = "figs/Validation_mRNASi_IHEC.png",
+  width = 12, height = 6
+)
 ```
 
 
@@ -900,8 +921,9 @@ The result from TCGAanalyze_Stemness validation in IHEC's Dataset is shown below
 In particular we observed that classes more pluripotent such as hematopoietic stem cell, erythroblast showed higher Stemness score whereas classes more differentiate and matures such as monocyte, mature neutrophil and macrophage showed lower Stemness score.
 
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-img <- readPNG("Validation_mRNASi_IHEC.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/Validation_mRNASi_IHEC.png")
+)
 ```
 
 
@@ -952,8 +974,6 @@ tab_mRNASi_merged <- merge(x = tab_mRNASi,
                     y = dataSubt_PanCancer,
                     by.x = "barcode",
                     by.y = "pan.samplesID")
-require(ggplot2)
-require(ggpubr)
 
 colnames(tab_mRNASi_merged)[3] <- "mRNASi"
 
@@ -967,22 +987,32 @@ p <- p + rotate_x_text(45)
 p <- p + geom_jitter(shape=16, position=position_jitter(0.2), color = "black")
 p <- p + geom_boxplot(position=position_dodge(1),outlier.colour = NA)
 p <- p + theme(text = element_text(size=20))
-ggsave(p , filename = "TCGA_BRCA_mRNASi_TP_NT.png",width = 5,height = 6)
+
+ggsave(p,
+  filename = "figs/TCGA_BRCA_mRNASi_TP_NT.png",
+  width = 5, height = 6
+)
 
 
 tab_mRNASi_merged_TP <- tab_mRNASi_merged[tab_mRNASi_merged$SampleType %in% "TP",]
 
-p<-ggplot(tab_mRNASi_merged_TP, aes(x=Subtype_Selected, y=mRNASi, fill=Subtype_Selected))
-p <- p + theme_classic()
+p <- ggplot(
+  tab_mRNASi_merged_TP,
+  aes(x = Subtype_Selected, y = mRNASi, fill = Subtype_Selected)
+)
 
-p <- p +  theme(legend.position="none")
-p <- p + rotate_x_text(45)
-p <- p + geom_jitter(shape=16, position=position_jitter(0.2), color = "black")
-p <- p + geom_boxplot(position=position_dodge(1),outlier.colour = NA)
-p <- p + theme(text = element_text(size=20))
-ggsave(p , filename = "TCGA_BRCA_mRNASi_subtypes.png",width = 5,height = 6)
+p <- p + 
+  theme_classic() + 
+  theme(legend.position="none") +
+  theme(text = element_text(size = 20)) +
+  rotate_x_text(45) +
+  geom_jitter(shape = 16, position = position_jitter(0.2), color = "black") +
+  geom_boxplot(position = position_dodge(1), outlier.colour = NA)
 
-
+ggsave(p,
+  filename = "figs/TCGA_BRCA_mRNASi_subtypes.png",
+  width = 5, height = 6
+)
 
 ```
 
@@ -990,14 +1020,16 @@ The result from TCGAanalyze_Stemness is shown below.
 Each point is a sample where Solid Tissue Normal (NT) are in red and Primary Tumor (TP) are in blue.
 
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-img <- readPNG("TCGA_BRCA_mRNASi_TP_NT.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/TCGA_BRCA_mRNASi_TP_NT.png")
+)
 ```
 
 The result from TCGAanalyze_Stemness with molecular subtypes is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-img <- readPNG("TCGA_BRCA_mRNASi_subtypes.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/TCGA_BRCA_mRNASi_subtypes.png")
+)
 ```
 
 
@@ -1008,7 +1040,6 @@ grid.raster(img)
 # working with LGG and GBM
 curCancer <- c("LGG","GBM")
 # We have previously generated a table with 33 cancer types barcodes and molecular subtypes.
-require(TCGAbiolinks)
 dataSubt_PanCancer <- PanCancerAtlas_subtypes()
 
 # Selecting TCGA breast cancer
@@ -1037,26 +1068,30 @@ tab_mRNASi_merged <- merge(x = tab_mRNASi,
                            y = dataSubt_PanCancer,
                            by.x = "barcode12",
                            by.y = "pan.samplesID")
-require(ggplot2)
-require(ggpubr)
 
 colnames(tab_mRNASi_merged)[4] <- "mRNASi"
 
-p<-ggplot(tab_mRNASi_merged, aes(x=Subtype_Selected, y=mRNASi, fill=Subtype_Selected))
-p <- p + theme_classic()
-p <- p +  theme(legend.position="none")
-p <- p + rotate_x_text(45)
-p <- p + geom_jitter(shape=16, position=position_jitter(0.2), color = "black")
-p <- p + geom_boxplot(position=position_dodge(1),outlier.colour = NA)
-p <- p + theme(text = element_text(size=20))
-ggsave(p , filename = "TCGA_LGG_GBM_mRNASi_subtypes.png",width = 5,height = 6)
+p <- ggplot(tab_mRNASi_merged) +
+  aes(x = Subtype_Selected, y = mRNASi, fill = Subtype_Selected) +
+  theme_classic() +
+  theme(legend.position = "none") +
+  theme(text = element_text(size = 20)) +
+  rotate_x_text(45) +
+  geom_jitter(shape = 16, position = position_jitter(0.2), color = "black") +
+  geom_boxplot(position = position_dodge(1), outlier.colour = NA)
+
+ggsave(p,
+  filename = "figs/TCGA_LGG_GBM_mRNASi_subtypes.png",
+  width = 5, height = 6
+)
 ```
 
 
 The result from TCGAanalyze_Stemness for LGG and GBM is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-img <- readPNG("TCGA_LGG_GBM_mRNASi_subtypes.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/TCGA_LGG_GBM_mRNASi_subtypes.png")
+)
 ```
 
 
@@ -1074,9 +1109,6 @@ tabSi$mRNASi_level <- as.character(tabSi$mRNASi_level)
 
 tabSi[tabSi$mRNASi < quantile(tabSi$mRNASi,1/3),"mRNASi_level"] <- "mRNASi Low"
 tabSi[tabSi$mRNASi > quantile(tabSi$mRNASi,2/3),"mRNASi_level"] <- "mRNASi High"
-
-
-require(TCGAbiolinks)
 
 dataClin_LGG <- GDCquery_clinic(project = "TCGA-LGG",type = "clinical")
 dataClin_GBM <- GDCquery_clinic(project = "TCGA-GBM",type = "clinical")
@@ -1102,18 +1134,21 @@ p <- TCGAanalyze_survival(dataClin_merged,
                           risk.table = TRUE,
                           filename = NULL)
 
-p <- p$plot
+p <- p$plot +
+  theme(legend.position = "bottom")
 
-p <- p  + theme(legend.position = "bottom")
-
-ggsave(p , filename = "TCGA_LGG_GBM_mRNASi_survival.png",width = 5,height = 6)
+ggsave(p,
+  filename = "figs/TCGA_LGG_GBM_mRNASi_survival.png",
+  width = 5, height = 6
+)
 ```
 
 
 The result from the Stemness-survival association for LGG and GBM is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-img <- readPNG("TCGA_LGG_GBM_mRNASi_survival.png")
-grid.raster(img)
+grid.raster(
+  readPNG("figs/TCGA_LGG_GBM_mRNASi_survival.png")
+)
 ```
 
 

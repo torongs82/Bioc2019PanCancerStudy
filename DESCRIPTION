@@ -7,25 +7,26 @@ Authors@R:
         given = "Antonio", family = "Colaprico",
         role = c("aut", "cre"), email = "axc1833@med.miami.edu"
       ))
-Description: Recently, The Cancer Genome Atlas (TCGA’s) Pan-Cancer Atlas initiative 
-        presented a comprehensive collection of 27 studies covering 11,000 patient tumors 
-        from 33 cancer types. These studies investigated cancer complexity from different 
-        angles by integrating multi -omics and clinical data. In particular, computational 
-        analyses have led to the identification of 299 cancer-driver genes and over 
-        3,400 driver mutations. However, it still remains critical to clarify the 
-        consequences of each alteration and the underlying biological effects. 
-        We will discuss several computational tools that are useful in clarifying gene
-        functions when performing integrative analysis of multi-omics datasets. 
-        In order to deal with the challenges of data retrieval and integration, 
-        TCGAbiolinks (Colaprico et al., 2016) and DeepBlueR (Albrecht et al., 2017) were 
-        developed to retrieve data from TCGA, CPTAC, GTEx, GEO and IHEC, Blueprint, ENCODE, 
-        Roadmap, respectively. Tumor-specific cancer-driver-gene events and downstream 
-        impact can be elucidated with MoonlightR by integrating these datasets 
-        (Colaprico et al. 2018) (). TCGAbiolinks and MoolightR have been used 
-        successfully in multiple studies for oncogenic processes identification 
-        (Ding et al., 2018), oncogenic clinically actionable driver genes discovery 
-        (Bailey et al., 2018), and comprehensive immune landscape characterization 
-        (Thorsson et al., 2018)
+Description: Recently, The Cancer Genome Atlas (TCGA’s) Pan-Cancer Atlas
+    initiative presented a comprehensive collection of 27 studies covering
+    11,000 patient tumors from 33 cancer types. These studies investigated
+    cancer complexity from different angles by integrating multi -omics and
+    clinical data. In particular, computational analyses have led to the
+    identification of 299 cancer-driver genes and over 3,400 driver mutations.
+    However, it still remains critical to clarify the consequences of each
+    alteration and the underlying biological effects. We will discuss several
+    computational tools that are useful in clarifying gene functions when
+    performing integrative analysis of multi-omics datasets. In order to deal
+    with the challenges of data retrieval and integration, TCGAbiolinks
+    (Colaprico et al., 2016) and DeepBlueR (Albrecht et al., 2017) were
+    developed to retrieve data from TCGA, CPTAC, GTEx, GEO and IHEC, Blueprint,
+    ENCODE, and Roadmap. Tumor-specific cancer-driver-gene events and downstream
+    impact can be elucidated with MoonlightR by integrating these datasets 
+    (Colaprico et al. 2018). TCGAbiolinks and MoolightR have been used
+    successfully in multiple studies for oncogenic processes identification 
+    (Ding et al., 2018), oncogenic clinically actionable driver genes discovery 
+    (Bailey et al., 2018), and comprehensive immune landscape characterization 
+    (Thorsson et al., 2018).
 Depends:
     R (>= 3.6)
 Imports:
