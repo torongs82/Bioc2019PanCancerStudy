@@ -476,7 +476,6 @@ data(DEGsmatrix)
 dataFEA <- FEA(DEGsmatrix = DEGsmatrix)
 dataFEA <- cbind(dataFEA, FDR = p.adjust(dataFEA$p.Value,method = "fdr") )
 dataFEA_filt <- dataFEA[dataFEA$FDR < 0.01,]
-colnames(dataFEA_filt)[3] <- "Moonlight.Z.score"
 ```
 
 The output can be visualized with a FEA plot (Functional Enrichment Analysis Plot)
@@ -488,7 +487,7 @@ Enrichment Analysis showing the BPs enriched significantly with |Moonlight Z-sco
 ```{r, eval = TRUE, echo = TRUE, message=FALSE, results='hide', warning=FALSE}
 plotFEA(dataFEA = dataFEA_filt,
         topBP = nrow(dataFEA_filt),
-        additionalFilename = "FEAplot.pdf", 
+        additionalFilename = "BRCA DEGs", 
         height = 10, 
         width = 10)
 ```
