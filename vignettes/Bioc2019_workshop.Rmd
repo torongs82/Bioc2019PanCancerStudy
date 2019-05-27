@@ -71,11 +71,11 @@ We will illustrate retrieval of different types of –omics datasets including: 
 
 ## `TCGA Gene Expression` (IlluminaHiSeq_RNASeqV2) and multi -omics data 
 The end user can search TCGA's samples for a specific cancer of origin, download and prepare a matrix of gene expression.
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 # DataDir is a directory to save your datasets
 DataDir <- "TCGAanalysis"
 
-require(TCGAbiolinks)
+library(TCGAbiolinks)
 
 cancerType <- "BRCA"
 
@@ -113,6 +113,7 @@ query_down <- GDCquery(project = paste0("TCGA-",cancerType),
 Now that we have defined the query, we can download the respective data. Makse sure you have a directory to save this data defined beforehand. The data will be downloaded to the folder `TCGA-BRCA` (the first value of `query_down$project`) as a subdirectory of the data directory specified. In addition to downloading the data, this function will write a file called "MANIFEST.txt" to your current *working directory*, not to the directory you specify.
 ```{r}
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
+library(TCGAbiolinks)
 GDCdownload(query_down,directory = DataDir)
 
 # Prepare expression matrix with geneID in the rows and samples (barcode) in the columns
