@@ -1,6 +1,6 @@
 Package: Bioc2019PanCancerStudy
 Title: Bioc2019PanCancerStudy
-Version: 0.1.0
+Version: 0.99.0
 Authors@R: 
     c(
       person(

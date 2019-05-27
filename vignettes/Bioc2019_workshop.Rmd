@@ -3,14 +3,16 @@ title: "Bioinformatics tools for integrating and understanding molecular changes
 author: "Antonio Colaprico, Gabriel Odom, Lily Wang, & Xi Chen"
 date: "`r Sys.Date()`"
 output:
-BiocStyle::html_document:
+  BiocStyle::html_document:
     number_sections: yes
     toc: true
 vignette: >
-    %\VignetteIndexEntry{Bioinformatics tools TCGAbiolinks Moonlight and DeepBlueR}
-    %\VignetteEncoding{UTF-8}
-    %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Bioinformatics tools TCGAbiolinks Moonlight and DeepBlueR}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
+
+
 
 
 ```{r setup, include = FALSE}
@@ -75,7 +77,7 @@ library(dplyr)
 
 ## `TCGA Gene Expression` (IlluminaHiSeq_RNASeqV2) and multi -omics data 
 The end user can search TCGA's samples for a specific cancer of origin, download and prepare a matrix of gene expression.
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 # DataDir is a directory to save your datasets
 DataDir <- "./TCGAanalysis/GDCdata/TCGA-BRCA"
 
@@ -314,7 +316,6 @@ GEO Gene Expression Omnibus (GEO) is the public repository for high throughput d
 require(MoonlightR)
 require(GEOquery)
 library(devtools)
-install_github("ibsquare/MoonlightR") 
 
 # get gene expression data
 dataNazor <- getDataGEO(GEOobject = "GSE30652",
@@ -464,7 +465,7 @@ The user can plot the result of a functional enrichment analysis using the funct
 Enrichment Analysis showing the BPs enriched significantly with |Moonlight Z-score| >=1 and FDR <= 0.01; increased levels are reported in yellow, decreased in purple, and green shows the -logFDR / 10. A negative Z-score indicates that the process’ activity is decreased while a positive Z-score indicates that the process’ activity is increased. Values in parentheses indicate the number of genes in common between the genes annotated in the biological process and the genes used as input for the functional enrichment.
 
 
-```{r, eval = FALSE, echo = TRUE, message=FALSE, results='hide', warning=FALSE}
+```{r, eval = TRUE, echo = TRUE, message=FALSE, results='hide', warning=FALSE}
 plotFEA(dataFEA = dataFEA_filt,
         topBP = nrow(dataFEA_filt),
         additionalFilename = "FEAplot.pdf", 
@@ -507,7 +508,7 @@ dataGRN <- GRN(TFs = rownames(DEGsmatrix)[1:100],
 The user can also perform upstream regulator analysis using the function `URA`. This function is applied to each DEG in the enriched gene set and its neighbors in the GRN.
 This function returns a table yielding upstream regulators of BPs mediated by the DEG and its targets, providing a score between DEG-BP.
 
-```{r, eval = FALSE, echo = TRUE, results='hide'}
+```{r, eval = TRUE, echo = TRUE, results='hide'}
 data(dataGRN)
 data(DEGsmatrix)
 
