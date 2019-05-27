@@ -21,3 +21,9 @@ NULL
 #' @name ImmuneMW
 #' @format A matrix with 13742 genes and 6 immune subtypes
 NULL
+
+#' @import TCGAbiolinks
+#' @import MoonlightR
+#' @import DeepBlueR
+#' @import SummarizedExperiment
+#' @import dplyr
