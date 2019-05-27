@@ -487,7 +487,7 @@ Enrichment Analysis showing the BPs enriched significantly with |Moonlight Z-sco
 ```{r, eval = TRUE, echo = TRUE, message=FALSE, results='hide', warning=FALSE}
 plotFEA(dataFEA = dataFEA_filt,
         topBP = nrow(dataFEA_filt),
-        additionalFilename = "BRCA DEGs", 
+        additionalFilename = "_BRCA_DEGs", 
         height = 10, 
         width = 10)
 ```

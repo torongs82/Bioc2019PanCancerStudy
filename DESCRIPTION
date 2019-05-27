@@ -22,7 +22,8 @@ Imports:
     SummarizedExperiment,
     dplyr
 License: Creative Commons Attribution 4.0 International License
-biocViews: DNAMethylation,
+biocViews:
+    DNAMethylation,
     DifferentialMethylation,
     GeneRegulation,
     GeneExpression,
