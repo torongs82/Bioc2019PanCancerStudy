@@ -26,6 +26,9 @@ knitr::opts_chunk$set(
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 library(knitr)
+library(TCGAbiolinks)
+library(MoonlightR)
+FiguresPath <- system.file(package = "Bioc2019PanCancerStudy", "vignettes")
 ```
 
 
