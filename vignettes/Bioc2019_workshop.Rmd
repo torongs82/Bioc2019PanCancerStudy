@@ -593,9 +593,7 @@ The goal of this study was to characterize intertumoral (between tumors) genomic
 http://bioconductor.org/packages/release/bioc/html/MoonlightR.html
 The figure mentioned above is shown below: 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-grid.raster(
-  readPNG("figs/Moonlight_PanCancer18_circos.png")
-)
+include_graphics(file.path(FiguresPath, "Moonlight_PanCancer18_circos.png"))
 ```
 
 
