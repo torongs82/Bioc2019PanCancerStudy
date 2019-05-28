@@ -31,9 +31,9 @@ library(MoonlightR)
 FiguresPath <- system.file(package = "Bioc2019PanCancerStudy", "vignettes")
 ```
 
+# Bioinformatics tools for integrating and understanding molecular changes associated with with Immune Response, Stemness and Oncogenic processes
 
-
-# Instructors
+## Instructors
 
 * Dr. Antonio colaprico^[Department of Public Health Sciences, Miller School of Medicine, The University of Miami, Miami, FL] (<axc1833@med.miami.edu>)
 * Dr. Gabriel J. Odom^[Department of Public Health Sciences, Miller School of Medicine, The University of Miami, Miami, FL] (<gabriel.odom@med.miami.edu>)
@@ -42,7 +42,7 @@ FiguresPath <- system.file(package = "Bioc2019PanCancerStudy", "vignettes")
 
 
 
-# Workshop Description
+## Workshop Description
 
 Recently, The Cancer Genome Atlas (TCGA’s) Pan-Cancer Atlas initiative presented a comprehensive collection of 27 studies
 covering 11,000 patient tumors from 33 cancer types. These studies investigated cancer complexity from different angles by integrating multi -omics and clinical data. In particular, computational analyses have led to the identification of 299 cancer-driver genes and over 3,400 driver mutations. However, it still remains critical to clarify the consequences of each alteration and the underlying biological effects. 
@@ -52,7 +52,7 @@ TCGAbiolinks and MoolightR have been used successfully in multiple studies for o
 processes identification (Ding et al., 2018, PMID: 29625049), oncogenic clinically actionable driver genes discovery (Bailey et al., 2018, PMID: 29625053), and comprehensive immune landscape characterization (Thorsson et al., 2018, PMID: 29628290)
 
 
-# Workshop: overview 
+## Workshop: overview 
 In this workshop we will demonstrate the capability of TCGAbiolinks, deepblueR and MoonlightR for (1) retrieving -omics data from different consortia (TCGA, GTEx, GEO and IHEC);  (2) discovering cancer driver genes by integrating multi-omics datasets; (3) Identifying the six immune subtypes from TCGA PanCancer dataset and (4) Estimating stemness scores using gene expression data. 
 Our goal is for the end users to understand how biological features (Immune Subtypes, Oncogenic Processes, Driver Genes and Stemness) can be used to expand understating of their own datasets.  
 
@@ -68,7 +68,7 @@ library(dplyr)
 library(Bioc2019PanCancerStudy)
 ```
 
-# Data retrieval from (GDC-TCGA, GEO and IHEC)
+## Data retrieval from (GDC-TCGA, GEO and IHEC)
 Using TCGAbiolinks, you can easily query, download, and prepare multi-omics data from NCI’s Genomic Data Commons (GDC). The GDC provides the cancer research community with a unified data repository that enables data sharing across cancer genomic studies in support of precision medicine. The GDC supports several cancer genome programs at the NCI Center for Cancer Genomics (CCG), including The Cancer Genome Atlas (TCGA) and Therapeutically Applicable Research to Generate Effective Treatments (TARGET). [https://gdc.cancer.gov/]
 
 ```{r load_TCGA, message=FALSE}
@@ -77,7 +77,7 @@ library(TCGAbiolinks)
 
 We will illustrate retrieval of different types of –omics datasets including: 1. Gene expression 2. Copy number 3. Protein expression (RRPA) 4. Methylation 5. Clinical data 6. microRNA expression 7. Mutation 8. Chromatin Accessibility
 
-## `TCGA Gene Expression` (IlluminaHiSeq_RNASeqV2) and multi -omics data 
+### `TCGA Gene Expression` (IlluminaHiSeq_RNASeqV2) and multi -omics data 
 The end user can search TCGA's samples for a specific cancer of origin, download and prepare a matrix of gene expression. This code is an example; we provide the output of this code in this workshop package (see below).
 ```{r, eval = FALSE}
 cancerType <- "BRCA"
@@ -200,7 +200,7 @@ To retrieve other datatypes using TCGAbiolinks it is possible to follow the exam
 
 
 
-## `GTEx gene expression` data
+### `GTEx gene expression` data
 The Genotype-Tissue Expression (GTEx) project is an ongoing effort to build a comprehensive public resource to study tissue-specific gene expression and regulation. Samples were collected from 53 non-diseased tissue sites across nearly 1000 individuals, primarily for molecular assays including WGS, WES, and RNA-Seq. [https://gtexportal.org/home/]
 You can easily search GTEx samples, download and prepare a matrix of gene expression [RNA-Seq].
 ```{r, eval = FALSE}
@@ -228,7 +228,7 @@ data_gtex_brain_GeneExpr <- assay(data_gtex_brain$gtex_brain,1)
 
 ```
 
-## `IHEC gene expression` data
+### `IHEC gene expression` data
 The International Human Epigenome Consortium (IHEC) is a global consortium with the primary goal of providing free access to high-resolution reference human epigenome maps for normal and disease cell types to the research community. [http://ihec-epigenomes.org/] 
 IHEC provides data currently available from the following consortia:
 * AMED-CREST (Japan)
@@ -329,7 +329,7 @@ save(IHEC_genes_matrix,  IHEC_sample_names, file = "IHEC_BLUEPRINT_geneExpr.Rdat
 #6:        common lymphoid progenitor     s10486
 ```
 
-## `GEO gene expression` dataset
+### `GEO gene expression` dataset
 GEO Gene Expression Omnibus (GEO) is the public repository for high throughput data at NCBI. [https://www.ncbi.nlm.nih.gov/geo/] Here we show how to retrieve GEOs’ samples, download and prepare a matrix of gene expression. In particular to retrieve the gene expression matrix for different cell types from Nazor et al. (2012, PMID: 22560082).
 
 ```{r, eval = FALSE}
@@ -385,8 +385,8 @@ save(NazorMatrix,dataNazor_samples, file = "Nazor_GSE30652.Rdata")
 
 ```
 
-# Oncogenic processes and driver genes using MoonlightR
-## MoonlightR overview
+## Oncogenic processes and driver genes using MoonlightR
+### MoonlightR overview
 In this section, we illustrate the moonlightR analysis pipeline using the BRCA data we downloaded from previous section. In order to make light of cancer development, it is crucial to identify the genes involved in the disease mechanisms and moreover understand what functional roles it plays. Common biological processes such as proliferation and apoptosis have been linked to cancer progression. MoonlightR is a new approach to define tumor suppressor genes (TSGs) and oncogenes (OCGs) based on functional enrichment analysis, inference of gene regulatory networks and upstream regulator analysis to score the importance of well-known biological processes with respect to the studied cancer. 
 
 In the MoonlightR pipeline, first, based on expression data we perform functional enrichment analysis, infer gene regulatory networks and upstream regulator analysis to score the importance of well-known biological processes with respect to the studied cancer. We then use these scores to predict two specific roles for genes: genes that act as TSGs and genes that act as OCGs. This methodology not only allows us to identify genes with dual roles (TSG in one cancer type and OCG in another) but also to elucidate the underlying biological processes they are involved with.
@@ -395,7 +395,7 @@ In the MoonlightR pipeline, first, based on expression data we perform functiona
 library(MoonlightR)
 ```
 
-## MoonlightR pipeline
+### MoonlightR pipeline
 Here we describe two Moonlight approaches: Moonlight-EB (expert based) and Moonlight-ML (machine learning). The EB and ML approaches share the following three initial steps (Fig 1b, Methods): 
 *(i) DPA: Moonlight identifies a set of Differentially Expressed Genes (DEGs) between two conditions;  
 *(ii) GRN: The gene expression data is used to infer a Gene Regulatory Network (GRN) with the DEGs as vertices and 
@@ -415,7 +415,7 @@ include_graphics(file.path(FiguresPath, "Moonlight_pipeline2.png"))
 ```
 
 
-## `DPA`: Differential Phenotype Analysis
+### `DPA`: Differential Phenotype Analysis
 Differential phenotype analysis (DPA) identifies genes or probes that are significantly different between two phenotypes such as normal vs. tumor, or normal vs. stage I, normal vs. a particular molecular subtype.
 For gene expression data, DPA performes a differential expression analysis (DEA) to identify differentially expressed genes (DEGs) using the `TCGAanalyze_DEA` function from \Biocpkg{TCGAbiolinks}.
 For methylation data, DPA is performes a differentially methylated probes analysis (DMP) to identify differentially methylated CpG sites using the `TCGAanalyze_DMR` function from \Biocpkg{TCGAbiolinks}.
@@ -460,7 +460,7 @@ include_graphics(file.path(FiguresPath, "DEGs_volcano.png"))
 ```
 
 
-## `FEA`: Functional Enrichment Analysis
+### `FEA`: Functional Enrichment Analysis
 The function FEA performs a functional enrichment analysis using Fisher’s exact test, which identifies gene sets that are significantly enriched with differentially expressed genes. The steps of FEA involve (i) evaluating if DEGs are involved in a biologlical process(BP) through an assessment of the overlap between the list of DEGs and genes relevant to this BP determined by literature mining and (ii) detecting the BPs over-represented by DEGs using Fisher Exact Test. 
 In the following, we considered BPs over-represented by genes with  |Moonlight-score| >=1 and FDR <= 0.01. (See Methodology in https://www.biorxiv.org/content/10.1101/265322v1.article-info)
 
@@ -495,7 +495,7 @@ include_graphics(file.path(FiguresPath, "FEAplot.png"))
 ```
 
 
-## `GRN`: Gene Regulatory Network
+### `GRN`: Gene Regulatory Network
 Next, the GRN function perform a gene regulatory network analysis to identify genes regulated by each DEG. In this function,  considering only tumor samples,  we calculate the pairwise mutual information between the DEGs and genes in dataFilt matrix (see previous section) . Afterwards, DEGs’ regulon, representing the genes regulated by a DEG, are defined by filtering out non-significant (p-value > 0.05) interactions using a permutation test (nboot = 100, nGenesPerm = 1000) and thus obtaining a set of regulated genes for each DEG. 
 
 ```{r, eval = FALSE}
@@ -522,7 +522,7 @@ data("dataGRN", package = "MoonlightR")
 ```
 
 
-## `URA`: Upstream Regulator Analysis
+### `URA`: Upstream Regulator Analysis
 The user can also perform upstream regulator analysis using the function `URA`. This function is applied to each DEG in the enriched gene set and its neighbors in the GRN.
 This function returns a table yielding upstream regulators of BPs mediated by the DEG and its targets, providing a score between DEG-BP.
 
@@ -540,7 +540,7 @@ dataURA <- URA(dataGRN = dataGRN,
 head(dataURA)
 ```
 
-## `PRA`: Pattern Recognition Analysis
+### `PRA`: Pattern Recognition Analysis
 `PRA`  allows for the identification of a list of TSGs and OCGs when a list of BPs such as apoptosis and proliferation are provided. Alternatively, we can also classify genes as OCGs or TSGs using a Random Forest based classifier trained on validated cancer driver genes (TSGs and OCGs). More specifically, we define a pattern for which the group of genes classified as OCGs share similar BP as apoptosis (DOWN) and proliferation (UP) while genes classified as TSGs share apoptosis (UP) and proliferation (DOWN).
 Once we have a table of gene scores for each BP from URA, we can incorporate the prior biological information to filter out genes with discordant biological effects. For example, it is known that apoptosis and proliferation of cells are opposite biological effects in tumor growth, so the A2M gene (with positive scores in both BPs) should be excluded.
 Pattern Recognition Analysis (PRA) combines information from the BPs with the output from URA, as shown in the next example:
@@ -588,7 +588,7 @@ knitr::kable(dataTSG_OCG, digits = 2,
 ```
 
 
-## Moonlight PanCancer Study (18 tumor types)
+### Moonlight PanCancer Study (18 tumor types)
 The goal of this study was to characterize intertumoral (between tumors) genomic epigenomic and transcriptomic heterogeneity in cancer tissue by identifying dual role genes. More specifically, we used the expression levels of genes in all the samples obtained from TCGA - GDC with IlluminaHiSeq RNASeqV2 in 18 normal tissues and 18 cancer tissues according to the TCGA criteria.We applied the complete Moonlight pipeline (FEA-URA-PRA) to extract those genes that were significantly increasing or decreasing biological processes such as proliferation of cells and apoptosis. The figure below shows the results of the moonlight pipeline that can be visualized with a circos plot, using the function `plotCircos` from \Biocpkg{MoonlightR}. For further examples see the \Biocpkg{MoonlightR} ’s vignette
 http://bioconductor.org/packages/release/bioc/html/MoonlightR.html
 The figure mentioned above is shown below: 
@@ -599,7 +599,7 @@ grid.raster(
 ```
 
 
-# Immune subtypes from Thorsson et al. (2018, PMID: 29628290)
+## Immune subtypes from Thorsson et al. (2018, PMID: 29628290)
 Thorsson et al. performed an extensive immunogenomic analysis of more than 10,000 tumors comprising 33 diverse cancer types by utilizing data compiled by TCGA. In this section we illustrate identifying Immune subtypes for TCGA and GEO tumor samples. Figure1C is from Thorsson et al. (2018, PMID: 29628290), which summarizes features of six different immune subtypes.
 
 ```{r, fig.width=10, echo=FALSE, fig.align="center"}
@@ -608,7 +608,7 @@ include_graphics(file.path(FiguresPath, "ImmuneSubtypes_workflow.png"))
 
 Across cancer types, we previously identified six immune subtypes—wound healing, IFN-\gamma dominant, inflammatory, lymphocyte depleted, immunologically quiet, and TGF-\beta dominant, which are characterized by differences in macrophage or lymphocyte signatures, Th1:Th2 cell ratio, extent of intratumoral heterogeneity, aneuploidy, extent of neoantigen load, overall cell proliferation, expression of immunomodulatory genes, and prognosis.
 
-## Survival analysis of TCGA KIRC samples with Immune Subtypes
+### Survival analysis of TCGA KIRC samples with Immune Subtypes
 In the following example we first retrieve the TCGA Immune Subtypes for KIRC (Kidney Renal Clear Cell Carcinoma) from Table S1 in Thorsson et al. (2018, PMID: 29628290), next we will run a Kaplan-Meier Overall Survival Analysis for these different Immune Subtypes.
 
 ```{r, eval = FALSE}
@@ -666,7 +666,7 @@ include_graphics(file.path(FiguresPath, "TCGA_KIRC_ImmuneSubtypes_survival.png")
 
 
 
-## Immune Subtypes for GEO samples (KIRC example) using data from (Jones et al., 2005  PMID: 16115910)
+### Immune Subtypes for GEO samples (KIRC example) using data from (Jones et al., 2005  PMID: 16115910)
 We illustrate how to predict different immune subtypes for different samples.  
 
 ```{r, eval = FALSE}
@@ -720,9 +720,9 @@ dataImmuneSubtype <- TCGAanalyze_ImmuneSubtypes(ImmuneMW = ImmuneMW,
 ```
 
 
-# Stemness Analysis
+## Stemness Analysis
 
-## Stemness overview
+### Stemness overview
 Stemness, defined as the potential for self-renewal and differentiation from the cell of origin, was originally attributed to normal stem cells that possess the ability to give rise to all cell types in the adult organism. Cancer progression involves gradual loss of a differentiated phenotype and acquisition of progenitor-like, stem-cell-like features. Undifferentiated primary tumors are more likely to result in cancer cell spread to distant organs, causing disease progression and poor prognosis, particularly because metastases are usually resistant to available therapies
 The Overall methodology for Development and Validation of the Stemness Indices from Malta et al. (2018, PMID: 29625051) is shown below:
 
@@ -744,7 +744,7 @@ Stemness Highlights:
 
 In the following subsection we will illustrate the methodology used in Malta et al. (2018, PMID: 29625051) for (i) validating the stemness signature trained on PCBC’s dataset in two external datasets (Nazor, IHEC) (ii) deriving the stemness score for TCGA BRCA and LGG-GBM samples, with association to molecular subtypes and survival outcomes.
 
-## Validation of Stemness signature in external dataset [GEO] Nazor et al. (2012, PMID: 22560082)
+### Validation of Stemness signature in external dataset [GEO] Nazor et al. (2012, PMID: 22560082)
 ```{r, eval = FALSE}
 # Firstly we have previously prepared the Gene Expression matrix (genes in rows,
 #   samples in columns). See previous section or download from the following
@@ -812,7 +812,7 @@ include_graphics(file.path(FiguresPath, "Validation_mRNASi_Nazor.png"))
 ```
 
 
-## Validation of Stemness signature in external dataset [IHEC] Stunnenberg et al. (2016, PMID: 27863232)
+### Validation of Stemness signature in external dataset [IHEC] Stunnenberg et al. (2016, PMID: 27863232)
 
 ```{r, eval = FALSE}
 # Firstly we have previously prepared the IHEC Gene Expression matrix (genes in rows , samples in columns) # see previous section or download from the following github link
@@ -907,7 +907,7 @@ include_graphics(file.path(FiguresPath, "Validation_mRNASi_IHEC.png"))
 ```
 
 
-## Generating Stemness score for TCGA BRCA gene expression data (mRNASi). Malta et al. (2018, PMID: 29625051)
+### Generating Stemness score for TCGA BRCA gene expression data (mRNASi). Malta et al. (2018, PMID: 29625051)
 
 ```{r, eval = FALSE}
 # Firstly we load Gene Expression matrix (genes in rows , samples in columns) 
@@ -1009,7 +1009,7 @@ include_graphics(file.path(FiguresPath, "TCGA_BRCA_mRNASi_subtypes.png"))
 ```
 
 
-## Generating Stemness score for TCGA LGG and GBM gene expression data (mRNASi). Malta et al. (2018, PMID: 29625051)
+### Generating Stemness score for TCGA LGG and GBM gene expression data (mRNASi). Malta et al. (2018, PMID: 29625051)
 
 ```{r, eval = FALSE}
 
@@ -1069,7 +1069,7 @@ include_graphics(file.path(FiguresPath, "TCGA_LGG_GBM_mRNASi_subtypes.png"))
 ```
 
 
-## Stemness index is associated with overall survival (Glioma example)
+### Stemness index is associated with overall survival (Glioma example)
 
 ```{r, eval = FALSE}
 
@@ -1125,7 +1125,7 @@ include_graphics(file.path(FiguresPath, "TCGA_LGG_GBM_mRNASi_survival.png"))
 
 
 
-# Session Information
+## Session Information
 ******
 ```{r sessionInfo}
 sessionInfo()
